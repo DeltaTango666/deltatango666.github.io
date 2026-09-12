@@ -123,6 +123,8 @@
 
                 items.forEach(item => {
 
+                    // Don't display index.html
+                    if (item.name.toLowerCase() === "index.html") return;
                     const li = document.createElement("li");
                     const link = document.createElement("a");
 
