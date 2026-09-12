@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeltaTango666 Projects</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #222;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        #status {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        a {
+            text-decoration: none;
+            color: #0969da;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .folder {
+            font-weight: bold;
+        }
+
+        .icon {
+            display: inline-block;
+            width: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>DeltaTango666</h1>
+    <div id="status">Loading files...</div>
+
+    <ul id="file-list"></ul>
+
+    <script>
+        const username = "DeltaTango666";
+        const repository = "deltatango666.github.io";
+        const branch = "main";
+
+        const apiUrl =
+            `https://api.github.com/repos/${username}/${repository}/git/trees/${branch}?recursive=1`;
+
+        async function loadFiles() {
+            const status = document.getElementById("status");
+            const list = document.getElementById("file-list");
+
+            try {
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API returned ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.truncated) {
+                    status.textContent = "Warning: Repository is too large to display everything.";
+                } else {
+                    status.textContent = `${data.tree.length} items`;
+                }
+
+                // Sort folders before files, then alphabetically
+                data.tree.sort((a, b) => {
+                    if (a.type === "tree" && b.type !== "tree") return -1;
+                    if (a.type !== "tree" && b.type === "tree") return 1;
+                    return a.path.localeCompare(b.path);
+                });
+
+                data.tree.forEach(item => {
+                    const li = document.createElement("li");
+                    const link = document.createElement("a");
+
+                    if (item.type === "tree") {
+                        // Folder
+                        link.href = item.path + "/";
+                        link.className = "folder";
+                        link.innerHTML = `<span class="icon">📁</span>${item.path}/`;
+                    } else {
+                        // File
+                        link.href = item.path;
+                        link.innerHTML = `<span class="icon">📄</span>${item.path}`;
+                    }
+
+                    li.appendChild(link);
+                    list.appendChild(li);
+                });
+
+            } catch (error) {
+                status.textContent = "Unable to load repository contents.";
+                console.error(error);
+            }
+        }
+
+        loadFiles();
+    </script>
+
+</body>
+</html>
