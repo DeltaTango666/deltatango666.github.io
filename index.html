@@ -121,33 +121,32 @@
                     return a.name.localeCompare(b.name);
                 });
 
-                items.forEach(item => {
+items.forEach(item => {
+    // Don't display index.html
+    if (item.name.toLowerCase() === "index.html") return;
 
-                    // Don't display index.html
-                    if (item.name.toLowerCase() === "index.html") return;
-                    const li = document.createElement("li");
-                    const link = document.createElement("a");
+    const li = document.createElement("li");
+    const link = document.createElement("a");
 
-                    if (item.type === "dir") {
+    if (item.type === "dir") {
+        // Folder
+        link.className = "folder";
+        link.href = "#" + item.path;
+        link.innerHTML = `<span class="icon">📁</span>${item.name}/`;
+    } else {
+        // File
+        if (item.name.toLowerCase().endsWith(".html") || item.name.toLowerCase().endsWith(".htm")) {
+            link.href = `https://${username.toLowerCase()}.github.io/${item.path}`;
+        } else {
+            link.href = item.download_url;
+        }
+        link.target = "_blank";
+        link.innerHTML = `<span class="icon">📄</span>${item.name}`;
+    }
 
-                        // Folder
-                        link.className = "folder";
-                        link.href = "#" + item.path;
-                        link.innerHTML =
-                            `<span class="icon">📁</span>${item.name}/`;
-
-                    } else {
-
-                        // File
-                        link.href = item.download_url;
-                        link.target = "_blank";
-                        link.innerHTML =
-                            `<span class="icon">📄</span>${item.name}`;
-                    }
-
-                    li.appendChild(link);
-                    fileList.appendChild(li);
-                });
+    li.appendChild(link);
+    fileList.appendChild(li);
+});
 
             } catch (error) {
                 fileList.innerHTML =
