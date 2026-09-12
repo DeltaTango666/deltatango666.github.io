@@ -4,113 +4,233 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeltaTango666</title>
-
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 20px;
-            color: #222;
+            margin: 0;
+            padding: 20px;
+            background: #008080; /* classic teal desktop */
+            font-family: "MS Sans Serif", "Segoe UI", Tahoma, sans-serif;
+            font-size: 12px;
+            color: #000;
         }
 
-        h1 {
-            margin-bottom: 10px;
+        /* Window frame */
+        .window {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #dfdfdf #808080 #808080 #dfdfdf;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
         }
 
-        #path {
-            color: #666;
-            margin-bottom: 20px;
+        /* Title bar */
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            padding: 3px 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .title-bar-text {
+            padding-left: 4px;
+        }
+
+        .title-bar-controls button {
+            width: 16px;
+            height: 14px;
+            margin-left: 2px;
+            border: 1px solid;
+            border-color: #fff #808080 #808080 #fff;
+            background: #c0c0c0;
+            font-size: 9px;
+            line-height: 1;
+            padding: 0;
+            cursor: default;
+        }
+
+        /* Menu / toolbar area */
+        .toolbar {
+            background: #c0c0c0;
+            border-bottom: 1px solid #808080;
+            padding: 4px 6px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toolbar button, .back-btn {
+            background: #c0c0c0;
+            border: 1px solid;
+            border-color: #fff #808080 #808080 #fff;
+            padding: 2px 10px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .toolbar button:active, .back-btn:active {
+            border-color: #808080 #fff #fff #808080;
+        }
+
+        /* Path / address bar */
+        .address-bar {
+            background: white;
+            border: 1px solid;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            margin: 6px;
+            padding: 3px 6px;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+        }
+
+        /* File list area */
+        .content {
+            background: white;
+            margin: 0 6px 6px 6px;
+            border: 1px solid;
+            border-color: #808080 #dfdfdf #dfdfdf #808080;
+            min-height: 320px;
+            overflow-y: auto;
         }
 
         ul {
             list-style: none;
+            margin: 0;
             padding: 0;
         }
 
         li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 3px 8px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        li:hover {
+            background: #000080;
+            color: white;
+        }
+
+        li:hover a {
+            color: white;
         }
 
         a {
             text-decoration: none;
-            color: #0969da;
-            font-size: 16px;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .folder {
-            font-weight: bold;
+            color: #000;
+            flex: 1;
         }
 
         .icon {
-            display: inline-block;
-            width: 25px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
         }
 
-        .back {
-            margin-bottom: 15px;
+        /* Special "View Page" button style */
+        .view-page {
             display: inline-block;
+            background: #c0c0c0;
+            border: 1px solid;
+            border-color: #fff #808080 #808080 #fff;
+            padding: 2px 12px;
+            font-weight: bold;
+            color: #000 !important;
+        }
+
+        .view-page:hover {
+            background: #000080;
+            color: white !important;
+            border-color: #808080 #fff #fff #808080;
+        }
+
+        /* Status bar */
+        .status-bar {
+            background: #c0c0c0;
+            border-top: 1px solid #808080;
+            padding: 3px 8px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
-
 <body>
+    <div class="window">
+        <div class="title-bar">
+            <div class="title-bar-text">DeltaTango666</div>
+            <div class="title-bar-controls">
+                <button>_</button>
+                <button>□</button>
+                <button>×</button>
+            </div>
+        </div>
 
-    <h1>DeltaTango666</h1>
+        <div class="toolbar">
+            <button id="back" class="back-btn hidden">← Up</button>
+            <span id="item-count">Loading...</span>
+        </div>
 
-    <div id="path"></div>
+        <div class="address-bar" id="path">/</div>
 
-    <a id="back" class="back" href="#" style="display:none;">
-        ← Back
-    </a>
+        <div class="content">
+            <ul id="file-list"></ul>
+        </div>
 
-    <ul id="file-list"></ul>
+        <div class="status-bar">
+            <span>Ready</span>
+            <span>GitHub Pages</span>
+        </div>
+    </div>
 
     <script>
         const username = "DeltaTango666";
         const repository = "deltatango666.github.io";
         const branch = "main";
 
-        const fileList = document.getElementById("file-list");
+        const fileList   = document.getElementById("file-list");
         const pathDisplay = document.getElementById("path");
         const backButton = document.getElementById("back");
+        const itemCount  = document.getElementById("item-count");
 
         function getPath() {
             return window.location.hash.substring(1);
         }
 
         async function loadFolder(path = "") {
-
             fileList.innerHTML = "";
             pathDisplay.textContent = path ? "/" + path : "/";
 
-            // Back button
+            // Back / Up button
             if (path) {
-                backButton.style.display = "inline-block";
-
+                backButton.classList.remove("hidden");
                 const parent = path.substring(0, path.lastIndexOf("/"));
-
-                backButton.onclick = function () {
+                backButton.onclick = () => {
                     window.location.hash = parent;
                 };
             } else {
-                backButton.style.display = "none";
+                backButton.classList.add("hidden");
             }
 
-            const apiUrl =
-                `https://api.github.com/repos/${username}/${repository}/contents/${path}?ref=${branch}`;
+            const apiUrl = `https://api.github.com/repos/${username}/${repository}/contents/${path}?ref=${branch}`;
 
             try {
                 const response = await fetch(apiUrl);
-
-                if (!response.ok) {
-                    throw new Error(`GitHub API returned ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
 
                 const items = await response.json();
 
@@ -121,50 +241,68 @@
                     return a.name.localeCompare(b.name);
                 });
 
-items.forEach(item => {
-    // Only hide index.html at the root (not in subdirectories)
-if (item.name.toLowerCase() === "index.html" && !path) return;
+                let visibleCount = 0;
 
-    const li = document.createElement("li");
-    const link = document.createElement("a");
+                items.forEach(item => {
+                    // Hide index.html only at the root
+                    if (item.name.toLowerCase() === "index.html" && !path) return;
 
-    if (item.type === "dir") {
-        // Folder
-        link.className = "folder";
-        link.href = "#" + item.path;
-        link.innerHTML = `<span class="icon">📁</span>${item.name}/`;
-    } else {
-        // File
-        if (item.name.toLowerCase().endsWith(".html") || item.name.toLowerCase().endsWith(".htm")) {
-            link.href = `https://${username.toLowerCase()}.github.io/${item.path}`;
-        } else {
-            link.href = item.download_url;
-        }
-        link.target = "_blank";
-        link.innerHTML = `<span class="icon">📄</span>${item.name}`;
-    }
+                    visibleCount++;
 
-    li.appendChild(link);
-    fileList.appendChild(li);
-});
+                    const li = document.createElement("li");
+                    const link = document.createElement("a");
+                    const icon = document.createElement("span");
+                    icon.className = "icon";
+
+                    if (item.type === "dir") {
+                        // Folder
+                        icon.textContent = "📁";
+                        link.href = "#" + item.path;
+                        link.textContent = item.name + "/";
+                    } else {
+                        // File
+                        icon.textContent = "📄";
+
+                        const isHtml = item.name.toLowerCase().endsWith(".html") ||
+                                       item.name.toLowerCase().endsWith(".htm");
+
+                        if (isHtml) {
+                            link.href = `https://${username.toLowerCase()}.github.io/${item.path}`;
+                        } else {
+                            link.href = item.download_url;
+                        }
+                        link.target = "_blank";
+
+                        // Special treatment for index.html in subdirectories
+                        if (item.name.toLowerCase() === "index.html") {
+                            link.textContent = "View Page";
+                            link.className = "view-page";
+                            icon.textContent = "🌐";
+                        } else {
+                            link.textContent = item.name;
+                        }
+                    }
+
+                    li.appendChild(icon);
+                    li.appendChild(link);
+                    fileList.appendChild(li);
+                });
+
+                itemCount.textContent = visibleCount + (visibleCount === 1 ? " object" : " objects");
 
             } catch (error) {
-                fileList.innerHTML =
-                    `<li>Unable to load this folder.</li>`;
-
+                fileList.innerHTML = `<li style="padding:12px;color:#800;">Unable to load this folder.</li>`;
+                itemCount.textContent = "Error";
                 console.error(error);
             }
         }
 
-        // Load the current folder
         function navigate() {
             loadFolder(getPath());
         }
 
         window.addEventListener("hashchange", navigate);
-
         navigate();
     </script>
-
 </body>
 </html>
