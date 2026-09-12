@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeltaTango666 Projects</title>
+    <title>DeltaTango666</title>
 
     <style>
         body {
@@ -18,7 +18,7 @@
             margin-bottom: 10px;
         }
 
-        #status {
+        #path {
             color: #666;
             margin-bottom: 20px;
         }
@@ -29,13 +29,14 @@
         }
 
         li {
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
 
         a {
             text-decoration: none;
             color: #0969da;
+            font-size: 16px;
         }
 
         a:hover {
@@ -50,13 +51,23 @@
             display: inline-block;
             width: 25px;
         }
+
+        .back {
+            margin-bottom: 15px;
+            display: inline-block;
+        }
     </style>
 </head>
 
 <body>
 
     <h1>DeltaTango666</h1>
-    <div id="status">Loading files...</div>
+
+    <div id="path"></div>
+
+    <a id="back" class="back" href="#" style="display:none;">
+        ← Back
+    </a>
 
     <ul id="file-list"></ul>
 
@@ -65,12 +76,34 @@
         const repository = "deltatango666.github.io";
         const branch = "main";
 
-        const apiUrl =
-            `https://api.github.com/repos/${username}/${repository}/git/trees/${branch}?recursive=1`;
+        const fileList = document.getElementById("file-list");
+        const pathDisplay = document.getElementById("path");
+        const backButton = document.getElementById("back");
 
-        async function loadFiles() {
-            const status = document.getElementById("status");
-            const list = document.getElementById("file-list");
+        function getPath() {
+            return window.location.hash.substring(1);
+        }
+
+        async function loadFolder(path = "") {
+
+            fileList.innerHTML = "";
+            pathDisplay.textContent = path ? "/" + path : "/";
+
+            // Back button
+            if (path) {
+                backButton.style.display = "inline-block";
+
+                const parent = path.substring(0, path.lastIndexOf("/"));
+
+                backButton.onclick = function () {
+                    window.location.hash = parent;
+                };
+            } else {
+                backButton.style.display = "none";
+            }
+
+            const apiUrl =
+                `https://api.github.com/repos/${username}/${repository}/contents/${path}?ref=${branch}`;
 
             try {
                 const response = await fetch(apiUrl);
@@ -79,47 +112,57 @@
                     throw new Error(`GitHub API returned ${response.status}`);
                 }
 
-                const data = await response.json();
+                const items = await response.json();
 
-                if (data.truncated) {
-                    status.textContent = "Warning: Repository is too large to display everything.";
-                } else {
-                    status.textContent = `${data.tree.length} items`;
-                }
-
-                // Sort folders before files, then alphabetically
-                data.tree.sort((a, b) => {
-                    if (a.type === "tree" && b.type !== "tree") return -1;
-                    if (a.type !== "tree" && b.type === "tree") return 1;
-                    return a.path.localeCompare(b.path);
+                // Folders first, then files
+                items.sort((a, b) => {
+                    if (a.type === "dir" && b.type !== "dir") return -1;
+                    if (a.type !== "dir" && b.type === "dir") return 1;
+                    return a.name.localeCompare(b.name);
                 });
 
-                data.tree.forEach(item => {
+                items.forEach(item => {
+
                     const li = document.createElement("li");
                     const link = document.createElement("a");
 
-                    if (item.type === "tree") {
+                    if (item.type === "dir") {
+
                         // Folder
-                        link.href = item.path + "/";
                         link.className = "folder";
-                        link.innerHTML = `<span class="icon">📁</span>${item.path}/`;
+                        link.href = "#" + item.path;
+                        link.innerHTML =
+                            `<span class="icon">📁</span>${item.name}/`;
+
                     } else {
+
                         // File
-                        link.href = item.path;
-                        link.innerHTML = `<span class="icon">📄</span>${item.path}`;
+                        link.href = item.download_url;
+                        link.target = "_blank";
+                        link.innerHTML =
+                            `<span class="icon">📄</span>${item.name}`;
                     }
 
                     li.appendChild(link);
-                    list.appendChild(li);
+                    fileList.appendChild(li);
                 });
 
             } catch (error) {
-                status.textContent = "Unable to load repository contents.";
+                fileList.innerHTML =
+                    `<li>Unable to load this folder.</li>`;
+
                 console.error(error);
             }
         }
 
-        loadFiles();
+        // Load the current folder
+        function navigate() {
+            loadFolder(getPath());
+        }
+
+        window.addEventListener("hashchange", navigate);
+
+        navigate();
     </script>
 
 </body>
