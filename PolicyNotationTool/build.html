@@ -33,6 +33,7 @@
     margin-top: 20px;
     box-shadow: 0 1px 3px rgba(15,32,64,0.08);
   }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
   button {
     background: var(--blue);
     color: #fff;
@@ -43,8 +44,13 @@
     font-weight: 600;
     cursor: pointer;
   }
-  button:hover { background: var(--navy); }
-  button:disabled { background: #c8cfda; cursor: not-allowed; }
+  button.secondary {
+    background: #fff;
+    color: var(--blue);
+    border: 1px solid var(--blue);
+  }
+  button:hover { filter: brightness(0.92); }
+  button:disabled { background: #c8cfda; color: #fff; border-color: #c8cfda; cursor: not-allowed; }
   #status {
     margin-top: 16px;
     font-size: 14px;
@@ -52,6 +58,11 @@
   }
   #status.error { color: var(--red); }
   #status.ok { color: var(--green); }
+  #folder-status {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #7a8499;
+  }
   a.download-link {
     display: inline-block;
     margin-top: 14px;
@@ -67,6 +78,38 @@
     border-radius: 4px;
     font-size: 13px;
   }
+
+  /* Confirmation modal */
+  #modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,32,64,0.35);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  #modal-backdrop.visible { display: flex; }
+  #modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 28px;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(15,32,64,0.25);
+  }
+  #modal h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    color: var(--navy);
+  }
+  #modal dl {
+    margin: 0 0 20px;
+    font-size: 14px;
+  }
+  #modal dt { color: #7a8499; margin-top: 8px; }
+  #modal dd { margin: 0; font-weight: 600; color: var(--gray-700); }
+  #modal button { width: 100%; }
 </style>
 </head>
 <body>
@@ -75,7 +118,11 @@
 <p class="sub">Inlines <code>styles.css</code> and <code>script.js</code> into <code>index.html</code> — runs entirely in your browser, no build step needed.</p>
 
 <div class="card">
-  <button id="build-btn" onclick="build()">Build merged file</button>
+  <div class="row">
+    <button id="folder-btn" onclick="chooseFolder()">Select project folder</button>
+    <button id="build-btn" onclick="build()">Build merged file</button>
+  </div>
+  <div id="folder-status">No folder selected — build will download the file instead of replacing it in place.</div>
   <div id="status"></div>
 </div>
 
@@ -84,15 +131,60 @@
   <ul>
     <li>This page must be served over <code>http(s)</code> (e.g. GitHub Pages, or <code>npx serve</code> locally) — opening it directly as a <code>file://</code> URL will block the fetch requests due to browser security rules.</li>
     <li>It fetches <code>index.html</code>, <code>styles.css</code>, and <code>script.js</code> from the same folder as this page, so keep them together.</li>
-    <li>The output filename defaults to <code>PolicyNotationTool.html</code>.</li>
+    <li><strong>Select project folder</strong> uses the File System Access API (Chrome/Edge only) to grant write access to your local project folder once per session, so <strong>Build</strong> can overwrite <code>PolicyNotationTool.html</code> in place instead of downloading a new copy each time. If your browser doesn't support this (e.g. Firefox, Safari), Build will fall back to a normal download.</li>
   </ul>
 </div>
 
+<div id="modal-backdrop">
+  <div id="modal">
+    <h2 id="modal-title">Build complete</h2>
+    <dl>
+      <dt>Timestamp</dt>
+      <dd id="modal-timestamp"></dd>
+      <dt>Rows in output file</dt>
+      <dd id="modal-rows"></dd>
+      <dt>File size</dt>
+      <dd id="modal-size"></dd>
+    </dl>
+    <button onclick="closeModal()">Done</button>
+  </div>
+</div>
+
 <script>
+let projectDirHandle = null;
+
 async function fetchText(path) {
   const res = await fetch(path, { cache: 'no-store' });
   if (!res.ok) throw new Error(`Could not fetch ${path} (${res.status}). Make sure it's in the same folder and this page is served over http/https.`);
   return res.text();
+}
+
+async function chooseFolder() {
+  const folderStatus = document.getElementById('folder-status');
+  if (!('showDirectoryPicker' in window)) {
+    folderStatus.textContent = 'Your browser does not support folder access (File System Access API). Chrome or Edge required for in-place replace; Build will download instead.';
+    return;
+  }
+  try {
+    projectDirHandle = await window.showDirectoryPicker();
+    folderStatus.textContent = `Folder selected: "${projectDirHandle.name}". Build will overwrite PolicyNotationTool.html there.`;
+  } catch (err) {
+    // User cancelled the picker — not an error worth surfacing loudly.
+    if (err.name !== 'AbortError') {
+      folderStatus.textContent = 'Could not access folder: ' + err.message;
+    }
+  }
+}
+
+function showModal(rowCount, byteSize) {
+  document.getElementById('modal-timestamp').textContent = new Date().toLocaleString();
+  document.getElementById('modal-rows').textContent = rowCount.toLocaleString();
+  document.getElementById('modal-size').textContent = (byteSize / 1024).toFixed(1) + ' KB';
+  document.getElementById('modal-backdrop').classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('visible');
 }
 
 async function build() {
@@ -115,30 +207,46 @@ async function build() {
     if (!linkRe.test(merged)) {
       throw new Error('Could not find the styles.css <link> tag in index.html');
     }
-    merged = merged.replace(linkRe, `<style>\n${css}\n</style>`);
+    merged = merged.replace(linkRe, '<style>\n' + css + '\n</style>');
 
     const scriptRe = /<script[^>]+src=["'][^"']*script\.js["'][^>]*>\s*<\/script>/i;
     if (!scriptRe.test(merged)) {
       throw new Error('Could not find the script.js <script> tag in index.html');
     }
-    merged = merged.replace(scriptRe, `<script>\n${js}\n</script>`);
+    // Built via concatenation so this file never contains the literal
+    // closing script-tag sequence inside its own inline script block
+    // (the HTML parser closes a script element on that exact text,
+    // even inside a JS string or comment).
+    merged = merged.replace(scriptRe, '<script>\n' + js + '\n<' + '/script>');
 
+    const rowCount = merged.split('\n').length;
     const blob = new Blob([merged], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-
-    status.className = 'ok';
-    status.textContent = `Built successfully (${(blob.size / 1024).toFixed(1)} KB).`;
 
     const existingLink = document.getElementById('dl-link');
     if (existingLink) existingLink.remove();
 
-    const a = document.createElement('a');
-    a.id = 'dl-link';
-    a.className = 'download-link';
-    a.href = url;
-    a.download = 'PolicyNotationTool.html';
-    a.textContent = 'Download PolicyNotationTool.html';
-    status.after(a);
+    if (projectDirHandle) {
+      // Overwrite PolicyNotationTool.html directly in the selected folder.
+      const fileHandle = await projectDirHandle.getFileHandle('PolicyNotationTool.html', { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      status.className = 'ok';
+      status.textContent = `Replaced PolicyNotationTool.html in "${projectDirHandle.name}".`;
+    } else {
+      const url = URL.createObjectURL(blob);
+      status.className = 'ok';
+      status.textContent = 'Built successfully. No folder selected, so here is a download instead:';
+      const a = document.createElement('a');
+      a.id = 'dl-link';
+      a.className = 'download-link';
+      a.href = url;
+      a.download = 'PolicyNotationTool.html';
+      a.textContent = 'Download PolicyNotationTool.html';
+      status.after(a);
+    }
+
+    showModal(rowCount, blob.size);
   } catch (err) {
     status.className = 'error';
     status.textContent = err.message;
