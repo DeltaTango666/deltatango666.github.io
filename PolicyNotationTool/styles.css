@@ -1,0 +1,929 @@
+  /* Google Fonts import (DM Sans + DM Mono) and CSS custom properties / design tokens.
+     Controls theme colors, spacing, fonts, and runtime-overridable appearance variables. */
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy: #0f2040;
+    --navy-mid: #1a3260;
+    --blue: #1e5fa8;
+    --blue-light: #2e7dd4;
+    --accent: #e8a020;
+    --accent-light: #f5c050;
+    --red: #c0392b;
+    --red-light: #fdf3f2;
+    --green: #1e8a4a;
+    --green-light: #edf7f1;
+    --gray-50: #f8f9fb;
+    --gray-100: #f0f2f6;
+    --gray-200: #e1e5ec;
+    --gray-300: #c8cfda;
+    --gray-500: #7a8499;
+    --gray-700: #3d4558;
+    --gray-900: #1a2035;
+    --white: #ffffff;
+    --border: 1px solid var(--gray-200);
+    --radius: 8px;
+    --shadow-sm: 0 1px 3px rgba(15,32,64,0.08);
+    --shadow-md: 0 4px 16px rgba(15,32,64,0.12);
+    --shadow-lg: 0 8px 32px rgba(15,32,64,0.16);
+    --user-page-bg: var(--gray-50);
+    --user-form-bg: var(--white);
+    --user-font-color: var(--gray-900);
+    --user-font-size: 14px;
+    --user-font-family: 'DM Sans', sans-serif;
+    --user-font-weight: 400;
+    --user-label-color: var(--gray-700);
+    --theme-sidebar-bg: var(--white);
+    --theme-settings-bg: var(--white);
+    --theme-header-bg: var(--navy);
+    --theme-header-text: var(--white);
+    --theme-subtitle-text: rgba(255,255,255,0.5);
+    --theme-logo-bg: var(--accent);
+    --theme-logo-text: var(--navy);
+    --theme-btn-primary-bg: var(--blue);
+    --theme-btn-primary-hover: var(--navy);
+    --theme-btn-primary-text: var(--white);
+    --theme-btn-secondary-bg: var(--gray-100);
+    --theme-btn-secondary-text: var(--gray-900);
+    --theme-input-bg: transparent;
+    --theme-input-line: #ccc;
+    --theme-input-focus: #007bff;
+    --theme-accent: var(--blue);
+    --theme-accent-soft: #eef4fb;
+    --main-content-bg: transparent;
+  }
+
+  html { font-size: var(--user-font-size); }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--user-font-family);
+    background: var(--user-page-bg);
+    color: var(--user-font-color);
+    font-size: 1rem;
+    font-weight: var(--user-font-weight);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  /* ===== HEADER =====
+     Sticky top bar: logo badge, tool title/subtitle, settings gear, and Reset All button. */
+  .app-header {
+    background: var(--theme-header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-badge {
+    background: var(--theme-logo-bg);
+    color: var(--theme-logo-text);
+    font-weight: 700;
+    font-size: calc(16 * 1rem / 14);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .header-title {
+    color: var(--theme-header-text);
+    font-size: calc(15 * 1rem / 14);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .header-subtitle {
+    color: var(--theme-subtitle-text);
+    font-size: calc(12 * 1rem / 14);
+  }
+  .btn-reset-all {
+    background: rgba(255,255,255,0.1);
+    color: var(--theme-header-text);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 7px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(13 * 1rem / 14);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-reset-all:hover { background: rgba(255,255,255,0.18); }
+  .header-actions { display: flex; align-items: center; gap: 10px; position: relative; }
+  .btn-settings {
+    background: rgba(255,255,255,0.1);
+    color: var(--theme-header-text);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 7px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: calc(16 * 1rem / 14);
+  }
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 4000;
+    display: none;
+  }
+  .settings-overlay.open { display: block; }
+  .settings-menu {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--theme-settings-bg);
+    border: var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    padding: 14px 16px;
+    display: none;
+    z-index: 4100;
+    min-width: 320px;
+    max-width: 92vw;
+    color: var(--user-font-color);
+  }
+  .settings-menu .option-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: inherit;
+    font-size: calc(12 * 1rem / 14);
+  }
+  .settings-menu .option-row:last-child { margin-bottom: 0; }
+  .settings-menu input[type="color"] {
+    width: 36px;
+    height: 24px;
+    border: var(--border);
+    border-radius: 4px;
+    padding: 0;
+    background: transparent;
+  }
+  .settings-menu select,
+  .settings-menu input[type="number"] {
+    border: var(--border);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: calc(12 * 1rem / 14);
+    background: var(--theme-settings-bg);
+    color: inherit;
+  }
+  .settings-menu.open { display: block; }
+  .settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: inherit;
+  }
+  .settings-close {
+    border: var(--border);
+    background: var(--gray-100);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px 8px;
+  }
+
+  /* ===== LAYOUT =====
+     Flex shell that places the sidebar and main content side-by-side under the header. */
+  .app-body {
+    display: flex;
+    min-height: calc(100vh - 60px);
+    color: var(--user-font-color);
+  }
+
+  /* ===== SIDEBAR / TOC =====
+     Left navigation checklist of change-type sections; sticky, resizable, scrollable. */
+  .sidebar {
+    width: 280px;
+    min-width: 220px;
+    max-width: 520px;
+    background: var(--theme-sidebar-bg);
+    border-right: var(--border);
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-section {
+    background: var(--user-page-bg);
+    padding: 12px 0;
+    border-bottom: var(--border);
+  }
+  .sidebar-resizer {
+    width: 8px;
+    flex: 0 0 8px;
+    cursor: col-resize;
+    background: transparent;
+    align-self: stretch;
+  }
+  .sidebar-resizer:hover { background: rgba(0, 0, 0, 0.08); }
+  .sidebar-section:last-child { border-bottom: none; }
+  .sidebar-section-title {
+    font-size: calc(10 * 1rem / 14);
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    padding: 8px 16px 4px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: all 0.12s;
+    border-left: 3px solid transparent;
+    color: inherit;
+    font-size: calc(13 * 1rem / 14);
+  }
+  .toc-item:hover { background: var(--gray-50); color: var(--theme-accent); }
+  .toc-item.active { background: var(--theme-accent-soft); border-left-color: var(--theme-accent); color: var(--theme-accent); font-weight: 600; }
+  .toc-item.selected { color: var(--theme-accent); font-weight: 600; }
+  .toc-check {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--gray-300);
+    border-radius: 3px;
+    cursor: pointer;
+    accent-color: var(--theme-accent);
+    flex-shrink: 0;
+  }
+  .toc-check:checked { accent-color: var(--theme-accent); }
+  .toc-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--gray-300);
+    flex-shrink: 0;
+    margin-left: 1px;
+  }
+  .toc-item.selected .toc-dot { background: var(--theme-accent); }
+
+  /* ===== MAIN CONTENT =====
+     Primary workspace that hosts the global contact card and all form sections. */
+  .main-content {
+    flex: 1;
+    padding: 28px;
+    max-width: none;
+    min-width: 0;
+    min-height: calc(100vh - 60px);
+    background: var(--main-content-bg);
+    background-repeat: repeat;
+    background-size: auto;
+    background-attachment: local;
+    border-radius: 12px;
+  }
+
+  /* ===== INSTRUCTIONS BOX =====
+     Shared card styling for instructional/help text blocks (if used). */
+  .instructions {
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .instructions h3 {
+    font-size: calc(14 * 1rem / 14);
+    font-weight: 700;
+    color: inherit;
+    margin-bottom: 10px;
+  }
+  .instructions ol {
+    padding-left: 20px;
+    color: inherit;
+    font-size: calc(13 * 1rem / 14);
+  }
+  .instructions li { margin-bottom: 4px; }
+
+  /* ===== FORM SECTIONS =====
+     Collapsible/toggleable panels for each policy-change type; .visible shows them. */
+  .form-section {
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+    display: none;
+  }
+  .form-section.visible { display: block; }
+
+  .section-header {
+    background: var(--theme-header-bg);
+    color: var(--theme-header-text);
+    padding: 14px 20px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-header h2 {
+    font-size: calc(15 * 1rem / 14);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .section-body { padding: 20px 24px; }
+
+  /* ===== FORM FIELDS =====
+     Grid-based field rows, underline-style text/date inputs, focus states, and labels. */
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .field-row.single { grid-template-columns: 1fr; }
+  .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .field-row.quad { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group:has(input[type="text"]),
+  .field-group:has(input[type="date"]) {
+    position: relative;
+  }
+
+  label {
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 600;
+    color: var(--user-label-color);
+    letter-spacing: 0.2px;
+  }
+
+  input[type="text"], input[type="date"], textarea, select {
+    border: var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: calc(13 * 1rem / 14);
+    color: inherit;
+    background: var(--theme-input-bg);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .field-group input[type="text"],
+  .field-group input[type="date"] {
+    border: none;
+    border-bottom: 2px solid var(--theme-input-line);
+    border-radius: 0;
+    background-color: transparent;
+    padding: 10px 4px 8px;
+    font-size: 16px;
+    box-shadow: none;
+    transition: border-color 0.3s ease;
+  }
+  .field-group input[type="text"]:focus,
+  .field-group input[type="date"]:focus {
+    border-bottom-color: var(--theme-input-focus);
+    box-shadow: none;
+  }
+  .field-group:has(input[type="text"]:focus) > label,
+  .field-group:has(input[type="date"]:focus) > label {
+    color: var(--theme-input-focus);
+    transition: color 0.3s ease;
+  }
+  input[type="text"]:focus, input[type="date"]:focus {
+    outline: none;
+  }
+  textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--theme-input-focus);
+    box-shadow: 0 0 0 3px rgba(46,125,212,0.12);
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  /* ===== RADIO GROUPS =====
+     Horizontal radio option rows used for Yes/No and multi-choice questions. */
+  .radio-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+  }
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: calc(13 * 1rem / 14);
+    color: inherit;
+    font-weight: 400;
+  }
+  .radio-label input[type="radio"] {
+    accent-color: var(--blue);
+    width: 15px; height: 15px;
+    cursor: pointer;
+  }
+
+  /* ===== CHECKBOXES =====
+     Styled checkbox labels used in discount grids and renewal checklists. */
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: calc(13 * 1rem / 14);
+    color: inherit;
+    padding: 3px 0;
+  }
+  .checkbox-label input[type="checkbox"] {
+    accent-color: var(--blue);
+    width: 15px; height: 15px;
+    cursor: pointer;
+  }
+
+  /* ===== QUESTION BLOCK =====
+     Bordered container for a single Q&A cluster (label + radios + optional details). */
+  .question-block,
+  .question-blocks {
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .question-block > label {
+    display: block;
+    margin-bottom: 8px;
+    color: inherit;
+    font-size: calc(13 * 1rem / 14);
+    font-weight: 500;
+  }
+
+  /* ===== WARNING / REMINDER =====
+     Yellow warning and red error callout boxes with icon prefixes for compliance notes. */
+  .warning-box {
+    background: #fff8e6;
+    border: 1px solid #f0c040;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: calc(12.5 * 1rem / 14);
+    font-weight: 600;
+    color: #7a5500;
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .warning-box::before { content: "⚠"; font-size: 14px; }
+  .warning-box a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  .error-box {
+    background: var(--red-light);
+    border: 1px solid #f0a090;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: calc(12.5 * 1rem / 14);
+    font-weight: 600;
+    color: var(--red);
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .error-box::before { content: "🚨"; font-size: 14px; }
+
+  /* ===== DIVIDER / SUB-SECTION TITLES =====
+     Horizontal rules and uppercase sub-section labels used inside long forms. */
+  .warning-box::before,
+  .error-box::before { font-size: calc(14 * 1rem / 14); }
+  .divider {
+    border: none;
+    border-top: var(--border);
+    margin: 20px 0;
+  }
+  .sub-section-title {
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--theme-accent);
+    margin-bottom: 14px;
+    margin-top: 4px;
+  }
+
+  /* ===== DYNAMIC ROWS (DRIVERS TABLE ETC) =====
+     Add/remove table rows for variable lists such as new household drivers. */
+  .dynamic-table {
+    border: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .dynamic-table-header {
+    display: grid;
+    background: var(--gray-100);
+    padding: 8px 12px;
+    font-size: calc(11 * 1rem / 14);
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    gap: 8px;
+  }
+  .dynamic-table-header.cols4 { grid-template-columns: 2fr 60px 60px 60px 32px; }
+  .dynamic-table-header.cols3 { grid-template-columns: 1fr 1fr 1fr 32px; }
+  .dynamic-table-header.cols2 { grid-template-columns: 1fr 1fr 32px; }
+  .dynamic-row {
+    display: grid;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: var(--border);
+    align-items: center;
+  }
+  .dynamic-row.cols4 { grid-template-columns: 2fr 60px 60px 60px 32px; }
+  .dynamic-row.cols3 { grid-template-columns: 1fr 1fr 1fr 32px; }
+  .dynamic-row.cols2 { grid-template-columns: 1fr 1fr 32px; }
+  .btn-remove-row {
+    background: #fdf3f2;
+    color: var(--red);
+    border: 1px solid #f0c0b8;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: calc(16 * 1rem / 14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+  }
+  .btn-remove-row:hover { background: var(--red); color: white; }
+  .btn-add-row {
+    background: var(--green-light);
+    color: var(--green);
+    border: 1px solid #a0d8b8;
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 600;
+    transition: all 0.12s;
+  }
+  .btn-add-row:hover { background: var(--green); color: white; }
+
+  /* ===== BUTTONS =====
+     Primary generate, secondary, add-row, remove-row, and autofill button styles. */
+  .btn-generate {
+    background: var(--theme-btn-primary-bg);
+    color: var(--theme-btn-primary-text);
+    border: none;
+    border-radius: 7px;
+    padding: 11px 24px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(14 * 1rem / 14);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(30,95,168,0.25);
+  }
+  .btn-generate:hover { background: var(--theme-btn-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,95,168,0.3); }
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: var(--theme-btn-secondary-bg);
+    color: var(--theme-btn-secondary-text);
+    border: var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(13 * 1rem / 14);
+    font-weight: 500;
+    transition: all 0.12s;
+  }
+  .btn-secondary:hover { background: var(--gray-200); }
+
+  /* ===== NOTE OUTPUT =====
+     Per-section generated-note panel plus the floating bottom "Generate Notes" tab/panel.
+     Individual .btn-generate / .note-output-area are hidden in favor of the global panel. */
+  .note-output-area {
+    margin-top: 20px;
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .note-output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--theme-sidebar-bg);
+    border-bottom: var(--border);
+  }
+  .note-output-header span {
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .note-output-actions { display: flex; gap: 8px; }
+  .note-textarea {
+    font-family: 'DM Mono', monospace;
+    font-size: calc(12.5 * 1rem / 14);
+    background: transparent;
+    border: none !important;
+    padding: 14px;
+    min-height: 120px;
+    color: inherit;
+    line-height: 1.6;
+  }
+  .note-textarea:focus { box-shadow: none !important; }
+
+  /* Global note panel — hover-to-reveal tab at bottom middle of viewport */
+  .notes-tab {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 176px;
+    height: 34px;
+    z-index: 1101;
+    background: var(--theme-btn-primary-bg);
+    color: var(--theme-btn-primary-text);
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: calc(12 * 1rem / 14);
+    letter-spacing: 0.4px;
+    box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.18);
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .notes-tab:hover { background: var(--theme-btn-primary-hover); }
+  .notes-tab .notes-tab-arrow {
+    font-size: calc(10 * 1rem / 14);
+    transition: transform 0.25s ease;
+  }
+  .notes-tab.expanded .notes-tab-arrow {
+    transform: rotate(180deg);
+  }
+  .floating-notes-panel {
+    position: fixed;
+    bottom: 34px;
+    left: 50%;
+    width: 380px;
+    max-width: calc(100vw - 16px);
+    max-height: min(560px, calc(100vh - 60px));
+    z-index: 1100;
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.16);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    transform: translate(-50%, 100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+  .floating-notes-panel.expanded {
+    transform: translate(-50%, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .floating-notes-title {
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    flex-shrink: 0;
+  }
+  .floating-generate-btn {
+    width: 100%;
+    background: var(--theme-btn-primary-bg);
+    color: var(--theme-btn-primary-text);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: calc(14 * 1rem / 14);
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .floating-notes-results {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+  .floating-notes-results.visible {
+    display: flex;
+  }
+  .floating-copy-btn {
+    width: 100%;
+    background: var(--gray-100);
+    border: var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: calc(13 * 1rem / 14);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .floating-output {
+    width: 100%;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 100px;
+    resize: none;
+    font-family: 'DM Mono', monospace;
+    font-size: calc(12 * 1rem / 14);
+    line-height: 1.45;
+    color: inherit;
+    overflow: auto;
+  }
+  .btn-generate,
+  .note-output-area {
+    display: none !important;
+  }
+
+  /* ===== CONTACT ROW =====
+     Shared who/when contact fields; section-local ones hidden, global contact always shown. */
+  .contact-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    background: var(--user-form-bg);
+    border: var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .form-section .contact-row { display: none !important; }
+  #sec-GlobalContact .contact-row { display: grid !important; }
+  .btn-autofill-time {
+    background: var(--theme-btn-primary-bg);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.12s;
+  }
+  .btn-autofill-time:hover { background: var(--theme-btn-primary-hover); }
+
+  /* ===== CONDITIONAL PANELS =====
+     Hidden-by-default blocks revealed via showCond()/JS when radios answer Yes/etc. */
+  .conditional { display: none; }
+  .conditional.show { display: block; }
+
+  /* ===== COVERAGE TABLE =====
+     Two-column grid helper for coverage-related field groups. */
+  .coverage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  /* ===== PROPERTY BUILDING DETAILS =====
+     Multi-column grids for COPE/building attributes on homeowners location forms. */
+  .building-details-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .systems-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  /* ===== TOGGLE SECTIONS =====
+     Expandable discount sub-panels (checkbox header + collapsible body). */
+  .toggle-section {
+    border: var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .toggle-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--gray-50);
+    cursor: pointer;
+    user-select: none;
+    font-size: calc(13 * 1rem / 14);
+    font-weight: 500;
+    color: inherit;
+  }
+  .toggle-header:hover { background: var(--gray-100); }
+  .toggle-arrow { font-size: calc(10 * 1rem / 14); transition: transform 0.2s; color: var(--gray-500); margin-left: auto; }
+  .toggle-body { padding: 14px 16px; display: none; border-top: var(--border); }
+  .toggle-section.open .toggle-arrow { transform: rotate(90deg); }
+  .toggle-section.open .toggle-body { display: block; }
+
+  /* ===== SCROLLBAR =====
+     Thin custom scrollbar for the sidebar only. */
+  .sidebar::-webkit-scrollbar { width: 5px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+
+  /* ===== COPY SUCCESS =====
+     Copy / clear buttons for note output areas, including "copied" success state. */
+  .copy-btn {
+    background: var(--white);
+    color: inherit;
+    border: var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(12 * 1rem / 14);
+    font-weight: 500;
+    transition: all 0.12s;
+  }
+  .copy-btn:hover { background: var(--theme-btn-primary-bg); color: white; border-color: var(--theme-btn-primary-bg); }
+  .copy-btn.copied { background: var(--green); color: white; border-color: var(--green); }
+  .clear-note-btn {
+    background: var(--white);
+    color: var(--gray-500);
+    border: var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: calc(12 * 1rem / 14);
+    transition: all 0.12s;
+  }
+  .clear-note-btn:hover { background: var(--red-light); color: var(--red); border-color: #f0a090; }
+
+  /* ===== EMPTY STATE =====
+     Placeholder shown when no change-type sections are selected in the sidebar. */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-500);
+  }
+  .empty-state .icon { font-size: calc(40 * 1rem / 14); margin-bottom: 12px; }
+  .empty-state p { font-size: calc(14 * 1rem / 14); }
+
+  /* ===== SECTION BADGE / MISC =====
+     Small category pills on section headers, indent helper, and checkbox grids. */
+  .section-badge {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: calc(10 * 1rem / 14);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Subsection indented */
+  .indent { padding-left: 16px; border-left: 3px solid var(--gray-200); margin-left: 4px; }
+
+  /* Checkbox grid for discounts */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }

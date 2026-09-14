@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Tool — Policy Notation Tool</title>
+<style>
+  :root {
+    --navy: #0f2040;
+    --blue: #1e5fa8;
+    --green: #1e8a4a;
+    --red: #c0392b;
+    --gray-50: #f8f9fb;
+    --gray-200: #e1e5ec;
+    --gray-700: #3d4558;
+  }
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-700);
+    max-width: 640px;
+    margin: 60px auto;
+    padding: 0 20px;
+    line-height: 1.5;
+  }
+  h1 { color: var(--navy); font-size: 22px; margin-bottom: 4px; }
+  p.sub { color: #7a8499; margin-top: 0; font-size: 14px; }
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: 0 1px 3px rgba(15,32,64,0.08);
+  }
+  button {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--navy); }
+  button:disabled { background: #c8cfda; cursor: not-allowed; }
+  #status {
+    margin-top: 16px;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  #status.error { color: var(--red); }
+  #status.ok { color: var(--green); }
+  a.download-link {
+    display: inline-block;
+    margin-top: 14px;
+    color: var(--blue);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  a.download-link:hover { text-decoration: underline; }
+  code {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Build: Single-file HTML</h1>
+<p class="sub">Inlines <code>styles.css</code> and <code>script.js</code> into <code>index.html</code> — runs entirely in your browser, no build step needed.</p>
+
+<div class="card">
+  <button id="build-btn" onclick="build()">Build merged file</button>
+  <div id="status"></div>
+</div>
+
+<div class="card">
+  <strong>Notes</strong>
+  <ul>
+    <li>This page must be served over <code>http(s)</code> (e.g. GitHub Pages, or <code>npx serve</code> locally) — opening it directly as a <code>file://</code> URL will block the fetch requests due to browser security rules.</li>
+    <li>It fetches <code>index.html</code>, <code>styles.css</code>, and <code>script.js</code> from the same folder as this page, so keep them together.</li>
+    <li>The output filename defaults to <code>PolicyNotationTool.html</code>.</li>
+  </ul>
+</div>
+
+<script>
+async function fetchText(path) {
+  const res = await fetch(path, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Could not fetch ${path} (${res.status}). Make sure it's in the same folder and this page is served over http/https.`);
+  return res.text();
+}
+
+async function build() {
+  const btn = document.getElementById('build-btn');
+  const status = document.getElementById('status');
+  status.className = '';
+  status.textContent = 'Fetching files...';
+  btn.disabled = true;
+
+  try {
+    const [html, css, js] = await Promise.all([
+      fetchText('index.html'),
+      fetchText('styles.css'),
+      fetchText('script.js'),
+    ]);
+
+    let merged = html;
+
+    const linkRe = /<link[^>]+rel=["']stylesheet["'][^>]*href=["'][^"']*styles\.css["'][^>]*>/i;
+    if (!linkRe.test(merged)) {
+      throw new Error('Could not find the styles.css <link> tag in index.html');
+    }
+    merged = merged.replace(linkRe, `<style>\n${css}\n</style>`);
+
+    const scriptRe = /<script[^>]+src=["'][^"']*script\.js["'][^>]*>\s*<\/script>/i;
+    if (!scriptRe.test(merged)) {
+      throw new Error('Could not find the script.js <script> tag in index.html');
+    }
+    merged = merged.replace(scriptRe, `<script>\n${js}\n</script>`);
+
+    const blob = new Blob([merged], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+
+    status.className = 'ok';
+    status.textContent = `Built successfully (${(blob.size / 1024).toFixed(1)} KB).`;
+
+    const existingLink = document.getElementById('dl-link');
+    if (existingLink) existingLink.remove();
+
+    const a = document.createElement('a');
+    a.id = 'dl-link';
+    a.className = 'download-link';
+    a.href = url;
+    a.download = 'PolicyNotationTool.html';
+    a.textContent = 'Download PolicyNotationTool.html';
+    status.after(a);
+  } catch (err) {
+    status.className = 'error';
+    status.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

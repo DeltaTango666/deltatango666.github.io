@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIG Policy Change Notation Tool</title>
+<link rel="stylesheet" href="styles.css">
+  <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+<body>
+
+<!-- ===== APP HEADER =====
+     Sticky navy header with BIG logo badge, tool title, settings menu (appearance), and Reset All. -->
+<header class="app-header">
+  <div class="header-logo">
+    <div class="logo-badge">BIG</div>
+    <div>
+      <div class="header-title">Policy Change Notation Tool</div>
+      <div class="header-subtitle">Broker Notation Assistant</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <!-- Appearance settings gear: opens modal for color scheme, main bg style, font family/size -->
+    <button class="btn-settings" onclick="toggleSettingsMenu()" title="Options">⚙</button>
+    <div class="settings-overlay" id="settings-overlay" onclick="closeSettingsMenu()"></div>
+    <div class="settings-menu" id="settings-menu">
+      <div class="settings-header">
+        <span>Appearance Options</span>
+        <button class="settings-close" onclick="closeSettingsMenu()">×</button>
+      </div>
+      <div class="option-row"><label for="opt-color-scheme">Color scheme</label><select id="opt-color-scheme" onchange="updateAppearanceSettings()"><option value="scheme1">Style 1</option><option value="scheme2">Style 2</option><option value="scheme3">Style 3</option><option value="scheme4">Style 4</option><option value="scheme5">Style 5</option><option value="scheme6">Style 6</option><option value="scheme7">Style 7</option><option value="scheme8">Style 8</option><option value="scheme9">Style 9</option><option value="scheme10">Style 10</option></select></div>
+      <div class="option-row"><label for="opt-main-bg-style">Main background style</label><select id="opt-main-bg-style" onchange="updateAppearanceSettings()"><option value="bg1">Background 1</option><option value="bg2">Background 2</option><option value="bg3">Background 3</option><option value="bg4">Background 4</option><option value="bg5">Background 5</option></select></div>
+      <div class="option-row"><label for="opt-font-family">Font</label><select id="opt-font-family" onchange="updateAppearanceSettings()"><option value="'DM Sans', sans-serif">DM Sans</option><option value="Arial, sans-serif">Arial</option><option value="'Trebuchet MS', sans-serif">Trebuchet MS</option><option value="Georgia, serif">Georgia</option><option value="'Courier New', monospace">Courier New</option></select></div>
+      <div class="option-row"><label for="opt-font-size">Font size</label><select id="opt-font-size" onchange="updateAppearanceSettings()"><option value="12px">12px</option><option value="13px">13px</option><option value="14px">14px</option><option value="15px">15px</option><option value="16px">16px</option><option value="18px">18px</option></select></div>
+      <div class="option-row"><button class="btn-secondary" onclick="resetAppearanceSettings()">Reset appearance</button></div>
+    </div>
+    <button class="btn-reset-all" onclick="resetAll()">↺ Reset All</button>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <!-- ===== SIDEBAR / TABLE OF CONTENTS =====
+       Checkbox TOC grouped by General / Auto / Property / Billing.
+       Checking a box calls toggleSection() to show the matching form panel. -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <label class="toc-item" id="toc-general"><input type="checkbox" class="toc-check" onchange="toggleSection('GeneralNote',this)"> <span>General Note</span></label>
+      <label class="toc-item" id="toc-cancelpolicy"><input type="checkbox" class="toc-check" onchange="toggleSection('CancelPolicy',this)"> <span>Cancel a Policy</span></label>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Auto</div>
+      <label class="toc-item" id="toc-autoamendcoverage"><input type="checkbox" class="toc-check" onchange="toggleSection('AutoAmendCoverage',this)"> <span>Auto Amend Coverage</span></label>
+      <label class="toc-item" id="toc-autorenewalchk"><input type="checkbox" class="toc-check" onchange="toggleSection('AutoRenewalChecklist',this)"> <span>Auto Renewal Checklist</span></label>
+      <label class="toc-item" id="toc-address"><input type="checkbox" class="toc-check" onchange="toggleSection('AddressChange',this)"> <span>Address Change</span></label>
+      <label class="toc-item" id="toc-name"><input type="checkbox" class="toc-check" onchange="toggleSection('NameChange',this)"> <span>Name Change</span></label>
+      <label class="toc-item" id="toc-addveh"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingVehicle',this)"> <span>Adding a Vehicle</span></label>
+      <label class="toc-item" id="toc-subveh"><input type="checkbox" class="toc-check" onchange="toggleSection('SubstitutingVehicle',this)"> <span>Substituting a Vehicle</span></label>
+      <label class="toc-item" id="toc-remveh"><input type="checkbox" class="toc-check" onchange="toggleSection('RemovingVehicle',this)"> <span>Removing a Vehicle</span></label>
+      <label class="toc-item" id="toc-adddrv"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingDriver',this)"> <span>Adding a Driver</span></label>
+      <label class="toc-item" id="toc-remdrv"><input type="checkbox" class="toc-check" onchange="toggleSection('RemovingDriver',this)"> <span>Removing a Driver</span></label>
+      <label class="toc-item" id="toc-intparty"><input type="checkbox" class="toc-check" onchange="toggleSection('InterestedParty',this)"> <span>Add/Remove/Amend Interested Party</span></label>
+      <label class="toc-item" id="toc-amrat"><input type="checkbox" class="toc-check" onchange="toggleSection('AmendRating',this)"> <span>Amend Rating / License Class</span></label>
+      <label class="toc-item" id="toc-disauto"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingDiscountAuto',this)"> <span>Adding Discount – Auto</span></label>
+      <label class="toc-item" id="toc-namedinsauto"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingNamedInsuredAuto',this)"> <span>Adding a Named Insured</span></label>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Property</div>
+      <label class="toc-item" id="toc-propren"><input type="checkbox" class="toc-check" onchange="toggleSection('PropertyRenewal',this)"> <span>Property Renewal</span></label>
+      <label class="toc-item" id="toc-namedins"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingNamedInsured',this)"> <span>Adding a Named Insured</span></label>
+      <label class="toc-item" id="toc-home"><input type="checkbox" class="toc-check" onchange="toggleSection('HomeownersLocation',this)"> <span>Add/Sub Location – Homeowners</span></label>
+      <label class="toc-item" id="toc-condo"><input type="checkbox" class="toc-check" onchange="toggleSection('CondoLocation',this)"> <span>Add/Sub Location – Rental</span></label>
+      <label class="toc-item" id="toc-remloc"><input type="checkbox" class="toc-check" onchange="toggleSection('RemovingLocation',this)"> <span>Removing a Location</span></label>
+      <label class="toc-item" id="toc-covchan"><input type="checkbox" class="toc-check" onchange="toggleSection('CoverageChange',this)"> <span>Amend Coverage</span></label>
+      <label class="toc-item" id="toc-mortg"><input type="checkbox" class="toc-check" onchange="toggleSection('InterestedPartyProperty',this)"> <span>Add/Remove/Amend Mortgagee</span></label>
+      <label class="toc-item" id="toc-disprop"><input type="checkbox" class="toc-check" onchange="toggleSection('AddingDiscountProperty',this)"> <span>Adding Discount – Property</span></label>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Billing</div>
+      <label class="toc-item" id="toc-payment-method"><input type="checkbox" class="toc-check" onchange="toggleSection('PaymentMethodChange',this)"> <span>Payment Method Change</span></label>
+      <label class="toc-item" id="toc-payment-plan"><input type="checkbox" class="toc-check" onchange="toggleSection('ChangePaymentPlan',this)"> <span>Change Payment Plan</span></label>
+      <label class="toc-item" id="toc-refund"><input type="checkbox" class="toc-check" onchange="toggleSection('RefundInquiry',this)"> <span>Refund Inquiry</span></label>
+      <label class="toc-item" id="toc-make-payment"><input type="checkbox" class="toc-check" onchange="toggleSection('MakePayment',this)"> <span>Make a Payment</span></label>
+      <label class="toc-item" id="toc-billing-other"><input type="checkbox" class="toc-check" onchange="toggleSection('BillingOther',this)"> <span>Other</span></label>
+    </div>
+
+  </nav>
+  <!-- Drag handle between sidebar and main; wired by initSidebarResize() -->
+  <div class="sidebar-resizer" id="sidebar-resizer" aria-hidden="true"></div>
+
+  <!-- ===== MAIN CONTENT AREA =====
+       Holds the always-visible Global Contact card, empty-state placeholder,
+       and every policy-change form section (shown when its TOC checkbox is checked). -->
+  <main class="main-content">
+
+    <!-- ===== GLOBAL CONTACT (applies to all notes) =====
+         Direction (Inbound/Outbound), method (Call/Email), who, and when.
+         Prefixed onto combined notes via buildGlobalContactSentence(). -->
+    <div class="form-section visible" id="sec-GlobalContact">
+      <div class="section-header">
+        <h2>CONTACT DETAILS (APPLIES TO ALL)</h2>
+        <span class="section-badge">Global</span>
+      </div>
+      <div class="section-body">
+        <div class="contact-row" style="display:grid !important">
+          <div class="field-group">
+            <label>Direction:</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="global-direction" value="Inbound" onchange="updateGlobalContactPreview()"> Inbound</label>
+              <label class="radio-label"><input type="radio" name="global-direction" value="Outbound" onchange="updateGlobalContactPreview()"> Outbound</label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Contact type:</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="global-method" value="Call" onchange="updateGlobalContactPreview()"> Call</label>
+              <label class="radio-label"><input type="radio" name="global-method" value="Email" onchange="updateGlobalContactPreview()"> Email</label>
+            </div>
+          </div>
+          <div></div>
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="global-contactedBy" placeholder="Name" oninput="updateGlobalContactPreview()"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="global-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026" oninput="updateGlobalContactPreview()"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('global-contactedTime')">Now ⏱</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EMPTY STATE =====
+         Shown when no change-type sections are selected; hidden once any section is visible. -->
+    <div id="emptyState" class="empty-state">
+      <div class="icon">📋</div>
+      <p>Select one or more change types from the left panel to begin.</p>
+    </div>
+
+
+    <!-- ===== GENERAL NOTE =====
+         Free-form contact log: who/when, reason/purpose, optional action required + explanation.
+         Generates a simple GENERAL NOTE block. -->
+    <div class="form-section" id="sec-GeneralNote">
+      <div class="section-header">
+        <h2>GENERAL NOTE</h2>
+        <span class="section-badge">General</span>
+      </div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group">
+            <label>Who called/emailed:</label>
+            <input type="text" id="gn-contactedBy" placeholder="Name of caller/emailer">
+          </div>
+          <div class="field-group">
+            <label>When did they call/email:</label>
+            <input type="text" id="gn-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026">
+          </div>
+          <button class="btn-autofill-time" onclick="autofillTime('gn-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single">
+          <div class="field-group">
+            <label>Reason/Purpose for contact:</label>
+            <textarea id="gn-reason" placeholder="Describe the reason for contact..."></textarea>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Action required?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="gn-action" value="Yes" onchange="showIf(this,'gn-explain-row',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="gn-action" value="No" onchange="showIf(this,'gn-explain-row',false)"> No</label>
+          </div>
+        </div>
+        <div id="gn-explain-row" class="field-row single conditional">
+          <div class="field-group">
+            <label>Explain action:</label>
+            <textarea id="gn-explain" placeholder="Describe the action required..."></textarea>
+          </div>
+        </div>
+        <button class="btn-generate" onclick="generateNote('GeneralNote')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-GeneralNote" style="display:none">
+          <div class="note-output-header">
+            <span>Generated Note</span>
+            <div class="note-output-actions">
+              <button class="copy-btn" onclick="copyNote('GeneralNote')">Copy</button>
+              <button class="clear-note-btn" onclick="clearNote('GeneralNote')">Clear</button>
+            </div>
+          </div>
+          <textarea class="note-textarea" id="notetext-GeneralNote" readonly></textarea>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===== CANCEL A POLICY (General) =====
+         Full cancellation workflow: identity confirmation, policy selection,
+         reason (with price sub-options), retention opportunity, additional
+         considerations, final confirmation, and notes. -->
+    <div class="form-section" id="sec-CancelPolicy">
+      <div class="section-header"><h2>CANCEL A POLICY</h2><span class="section-badge">General</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="cp-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="cp-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('cp-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Account manager handling cancellation:</label><input type="text" id="cp-accountManager" placeholder="Account manager name"></div></div>
+
+        <div class="question-block"><label style="font-weight:700">Section 1 - Confirmation of Request</label>
+          <label class="radio-label"><input type="checkbox" id="cp-confirmIdentity"> Confirm client identity and policy details</label>
+          <div class="field-row">
+            <div class="field-group"><label>Current Carrier:</label><input type="text" id="cp-currentCarrier" placeholder="Current carrier"></div>
+            <div class="field-group"><label>Branch Code:</label><input type="text" id="cp-branchCode" placeholder="Branch code"></div>
+          </div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="cp-confirmPolicies" onchange="toggleCancelPolicies(this.checked)"> Confirm which policy/policies they wish to cancel</label>
+          <div id="cp-policies-container" class="conditional" style="margin-top:10px">
+            <div class="dynamic-table" id="cp-policiesTable">
+              <div class="dynamic-table-header cols4">
+                <span>Policy Number</span><span>Home</span><span>Auto</span><span>Other</span><span></span>
+              </div>
+            </div>
+            <button class="btn-add-row" onclick="addCancelPolicyRow()">+ Add Policy</button>
+          </div>
+          <div class="field-row" style="margin-top:10px">
+            <div class="field-group"><label>Desired cancellation effective date:</label><input type="date" id="cp-effectiveDate"></div>
+            <div class="field-group"><label>Total premium $ cancelled:</label><input type="text" id="cp-totalPremium" placeholder="Amount"></div>
+          </div>
+          <div class="field-row" style="margin-top:10px">
+            <div class="field-group"><label>Competitor premium:</label><input type="text" id="cp-competitorPremium" placeholder="Competitor premium amount"></div>
+            <div class="field-group"><label>Competitor market:</label><input type="text" id="cp-competitorMarket" placeholder="Competitor market name"></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 2 - Ask for Reason</label>
+          <div class="field-group"><label>Reason for cancellation:</label>
+            <select id="cp-reason" onchange="handleCancelReasonChange()">
+              <option value="">Select a reason...</option>
+              <option value="Price">Price</option>
+              <option value="Market Service">Market Service</option>
+              <option value="Brokerage Service">Brokerage Service</option>
+              <option value="Coverage">Coverage</option>
+              <option value="Moved">Moved</option>
+              <option value="Market Initiated Cancellation">Market Initiated Cancellation</option>
+              <option value="LOA">LOA</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div id="cp-otherReason" class="conditional" style="margin-top:10px"><div class="field-row single"><div class="field-group"><label>Please specify:</label><textarea id="cp-otherReasonText" placeholder="Enter detailed reason..."></textarea></div></div></div>
+          <div id="cp-priceOptions" class="conditional" style="margin-top:10px">
+            <label class="radio-label"><input type="checkbox" id="cp-lostToMarket" onchange="showCond('cp-lostToMarketName',this.checked)"> Lost to market</label>
+            <div id="cp-lostToMarketName" class="conditional" style="margin-left:20px;margin-top:5px"><div class="field-group"><label>Market name:</label><input type="text" id="cp-lostToMarketNameText" placeholder="Enter market name"></div></div>
+            <label class="radio-label"><input type="checkbox" id="cp-savingsPercentage" onchange="showCond('cp-savingsPercentageValue',this.checked)"> Savings Percentage</label>
+            <div id="cp-savingsPercentageValue" class="conditional" style="margin-left:20px;margin-top:5px"><div class="field-group"><label>Savings percentage:</label><input type="text" id="cp-savingsPercentageText" placeholder="e.g. 15%"></div></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 3 - Retention Opportunity</label>
+          <label>Is client open to staying if a competitive option exists?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="cp-openStaying" value="Yes" onchange="showCond('cp-didWeQuote',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="cp-openStaying" value="No" onchange="showCond('cp-didWeQuote',false)"> No</label>
+          </div>
+          <div id="cp-didWeQuote" class="conditional" style="margin-top:10px">
+            <label>Did we quote?</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="cp-didWeQuoteRadio" value="Yes" onchange="showCond('cp-didWeQuoteWhy',false)"> Yes</label>
+              <label class="radio-label"><input type="radio" name="cp-didWeQuoteRadio" value="No" onchange="showCond('cp-didWeQuoteWhy',true)"> No</label>
+            </div>
+            <div id="cp-didWeQuoteWhy" class="conditional" style="margin-top:5px"><div class="field-row single"><div class="field-group"><label>Why:</label><textarea id="cp-didWeQuoteWhyText" placeholder="Explain why we did not quote..."></textarea></div></div></div>
+          </div>
+          <label style="margin-top:10px">Permission to call and win back next year?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="cp-permissionCallback" value="Yes" onchange="showCond('cp-callbackContact',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="cp-permissionCallback" value="No" onchange="showCond('cp-callbackContact',false)"> No</label>
+          </div>
+          <div id="cp-callbackContact" class="conditional" style="margin-top:5px"><div class="field-group"><label>Best phone number / email to contact:</label><input type="text" id="cp-callbackContactText" placeholder="Enter phone or email"></div></div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 4 - Additional Considerations</label>
+          <div class="field-row single"><div class="field-group"><label>Existing policy notes:</label><textarea id="cp-existingPolicyNotes" placeholder="Enter notes about existing policies..."></textarea></div></div>
+          <div class="checkbox-grid">
+            <label class="radio-label"><input type="checkbox" id="cp-discussMultiline"> Discuss impact on multi-line discounts</label>
+            <label class="radio-label"><input type="checkbox" id="cp-reviewClaims"> Review any outstanding claims / payments</label>
+            <label class="radio-label"><input type="checkbox" id="cp-adviseFees"> Advise of potential cancellation fees or insurer rules</label>
+            <label class="radio-label"><input type="checkbox" id="cp-provideNextSteps"> Provide next steps and timelines</label>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 5 - Final Confirmation</label>
+          <div class="checkbox-grid">
+            <label class="radio-label"><input type="checkbox" id="cp-confirmProceed"> Confirm client still wishes to proceed</label>
+            <label class="radio-label"><input type="checkbox" id="cp-processCancellation"> Process cancellation (obtain LPV, follow normal cancellation procedures)</label>
+            <label class="radio-label"><input type="checkbox" id="cp-provideConfirmation"> Provide confirmation and timeline</label>
+            <label class="radio-label"><input type="checkbox" id="cp-thankClient"> Thank client professionally</label>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 6 - Additional Notes to Service/Conversation</label>
+          <div class="field-row single"><div class="field-group"><textarea id="cp-additionalNotes" placeholder="Enter any additional notes about the service or conversation..."></textarea></div></div>
+        </div>
+
+        <button class="btn-generate" onclick="generateNote('CancelPolicy')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-CancelPolicy" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('CancelPolicy')">Copy</button><button class="clear-note-btn" onclick="clearNote('CancelPolicy')">Clear</button></div></div><textarea class="note-textarea" id="notetext-CancelPolicy" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- AMEND COVERAGE (AUTO) -->
+    <!-- ============================== -->
+    <div class="form-section" id="sec-AutoAmendCoverage">
+      <div class="section-header"><h2>AMEND COVERAGE – AUTO</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="amc-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="amc-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('amc-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="amc-effectiveDate"></div></div>
+        <div class="field-row">
+          <div class="field-group"><label>Vehicle:</label><input type="text" id="amc-vehicle" placeholder="Year Make Model"></div>
+          <div class="field-group">
+            <label>Is the vehicle leased?</label>
+            <div class="radio-group" style="margin-top:6px">
+              <label class="radio-label"><input type="radio" name="amc-leased" value="Yes"> Yes</label>
+              <label class="radio-label"><input type="radio" name="amc-leased" value="No"> No</label>
+            </div>
+          </div>
+        </div>
+        <div class="error-box">FULL COVERAGE IS REQUIRED for leased/financed vehicles!</div>
+	<div class="warning-box">Reminder, As of July 1st 2026, please use the AB Notation Tool to complete any of these changes. You can locate the file <a href="https://billyardinsurance.sharepoint.com/sites/PersonalLines/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FPersonalLines%2FShared%20Documents%2FOntario%20Accident%20Benefits%2FBIG%20%2D%20Policy%20Change%20Notation%20Tool%20%28ON%29%5F121%2Epdf&parent=%2Fsites%2FPersonalLines%2FShared%20Documents%2FOntario%20Accident%20Benefits" target="_blank" rel="noopener">here</a>.</div>
+        <div class="field-row single"><div class="field-group"><label>Details of coverage being amended:</label><textarea id="amc-details" placeholder="Describe the coverage change in detail..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Reason for coverage change:</label><textarea id="amc-reason" placeholder="What's the reason?..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="amc-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AutoAmendCoverage')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AutoAmendCoverage" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AutoAmendCoverage')">Copy</button><button class="clear-note-btn" onclick="clearNote('AutoAmendCoverage')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AutoAmendCoverage" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== AUTO RENEWAL CHECKLIST (Auto) =====
+         Detailed 8-section renewal review: policy holder verification, address,
+         vehicles/drivers, discounts, missing coverage recommendations, premium
+         concerns, monoline, and additional notes. -->
+    <div class="form-section" id="sec-AutoRenewalChecklist">
+      <div class="section-header"><h2>AUTO RENEWAL CHECKLIST</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="field-row triple">
+          <div class="field-group"><label>Client name:</label><input type="text" id="arc-clientName" placeholder="Client name"></div>
+          <div class="field-group"><label>Policy number(s):</label><input type="text" id="arc-policyNumbers" placeholder="Policy number(s)"></div>
+          <div class="field-group"><label>Date of review:</label><input type="date" id="arc-reviewDate"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Account manager:</label><input type="text" id="arc-accountManager" placeholder="Account manager"></div>
+          <div class="field-group"><label>Percentage increase:</label><input type="text" id="arc-percentageIncrease" placeholder="e.g. 12.5%"></div>
+          <div class="field-group"></div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 1 - Confirm Policy Holder</label>
+          <label class="radio-label"><input type="checkbox" id="arc-verifyInsured"> Verify named insured on the policy and that they are still the registered owner of the vehicles on the policy.</label>
+          <label style="margin-top:5px">Changes required?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="arc-section1" value="Changes Required" onchange="showCond('arc-section1Notes',true)"> Changes Required</label>
+            <label class="radio-label"><input type="radio" name="arc-section1" value="No changes required" onchange="showCond('arc-section1Notes',false)"> No changes required</label>
+          </div>
+          <div id="arc-section1Notes" class="conditional" style="margin-top:5px"><div class="field-row single"><div class="field-group"><label>Relevant information:</label><textarea id="arc-section1NotesText" placeholder="Enter relevant information about changes..."></textarea></div></div></div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 2 - Verify Address</label>
+          <label class="radio-label"><input type="checkbox" id="arc-confirmMailing"> Confirm mailing address</label>
+          <label style="margin-top:5px">Mailing address changes?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="arc-section2Mailing" value="Changes Required"> Changes Required</label>
+            <label class="radio-label"><input type="radio" name="arc-section2Mailing" value="No changes required"> No changes required</label>
+          </div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="arc-confirmGaraging"> Confirm garaging address</label>
+          <label style="margin-top:5px">Garaging address changes?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="arc-section2Garaging" value="Changes Required"> Changes Required</label>
+            <label class="radio-label"><input type="radio" name="arc-section2Garaging" value="No changes required"> No changes required</label>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 3 - Review vehicles and drivers on policy for each vehicle</label>
+          <label class="radio-label"><input type="checkbox" id="arc-verifyUse"> Verify vehicle use (personal/business/other)</label>
+          <div class="radio-group" style="margin-top:5px"><label class="radio-label"><input type="radio" name="arc-section3Use" value="Changes Required"> Changes Required</label><label class="radio-label"><input type="radio" name="arc-section3Use" value="No changes required"> No changes required</label></div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="arc-verifyKm"> Verify annual kilometer/mileage</label>
+          <div class="radio-group" style="margin-top:5px"><label class="radio-label"><input type="radio" name="arc-section3Km" value="Changes Required"> Changes Required</label><label class="radio-label"><input type="radio" name="arc-section3Km" value="No changes required"> No changes required</label></div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="arc-confirmOperators"> Confirm primary and occasional operators</label>
+          <div class="radio-group" style="margin-top:5px"><label class="radio-label"><input type="radio" name="arc-section3Operators" value="Changes Required"> Changes Required</label><label class="radio-label"><input type="radio" name="arc-section3Operators" value="No changes required"> No changes required</label></div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="arc-checkLicensed"> Check for any other licensed operators in the household - and amend if required</label>
+          <div class="radio-group" style="margin-top:5px"><label class="radio-label"><input type="radio" name="arc-section3Licensed" value="Changes Required"> Changes Required</label><label class="radio-label"><input type="radio" name="arc-section3Licensed" value="No changes required"> No changes required</label></div>
+          <label class="radio-label" style="margin-top:10px"><input type="checkbox" id="arc-confirmNoBusiness"> Confirm no business use</label>
+          <div class="radio-group" style="margin-top:5px"><label class="radio-label"><input type="radio" name="arc-section3Business" value="Changes Required"> Changes Required</label><label class="radio-label"><input type="radio" name="arc-section3Business" value="No changes required"> No changes required</label></div>
+          <div class="field-row single" style="margin-top:10px"><div class="field-group"><label>Notes:</label><textarea id="arc-section3Notes" placeholder="Enter section 3 notes..."></textarea></div></div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 4 - Discounts</label>
+          <div class="field-row triple">
+            <div class="field-group"><label>Winter Tires</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-winterOffered"> Offered</label><label class="radio-label"><input type="checkbox" id="arc-winterYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-winterNo"> No</label></div></div>
+            <div class="field-group"><label>Telematics (ie MyBridge, Aviva Journey)</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-telematicsOffered"> Offered</label><label class="radio-label"><input type="checkbox" id="arc-telematicsYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-telematicsNo"> No</label></div></div>
+            <div class="field-group"><label>Driver Training</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-driverTrainingOffered"> Offered</label><label class="radio-label"><input type="checkbox" id="arc-driverTrainingYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-driverTrainingNo"> No</label></div></div>
+          </div>
+          <div class="field-row triple" style="margin-top:10px">
+            <div class="field-group"><label>Winter tires notes:</label><input type="text" id="arc-winterNotes" placeholder="Enter notes"></div>
+            <div class="field-group"><label>Telematics notes:</label><input type="text" id="arc-telematicsNotes" placeholder="Enter notes"></div>
+            <div class="field-group"><label>Driver training notes:</label><input type="text" id="arc-driverTrainingNotes" placeholder="Enter notes"></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 5 - Missing Coverage Recommendations</label>
+          <div class="field-row triple">
+            <div class="field-group"><label>OPCF 20</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-opcf20Yes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-opcf20No"> No</label><label class="radio-label"><input type="checkbox" id="arc-opcf20Declined"> Declined</label></div></div>
+            <div class="field-group"><label>OPCF 27</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-opcf27Yes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-opcf27No"> No</label><label class="radio-label"><input type="checkbox" id="arc-opcf27Declined"> Declined</label></div></div>
+            <div class="field-group"><label>OPCF 43 - Bill of Sale / Lease Agreement</label><div class="radio-group"><label class="radio-label"><input type="radio" name="arc-opcf43" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="arc-opcf43" value="No"> No</label></div></div>
+          </div>
+          <div class="field-row triple" style="margin-top:10px">
+            <div class="field-group"><label>OPCF 20 notes:</label><input type="text" id="arc-opcf20Notes" placeholder="Enter notes"></div>
+            <div class="field-group"><label>OPCF 27 notes:</label><input type="text" id="arc-opcf27Notes" placeholder="Enter notes"></div>
+            <div class="field-group"></div>
+          </div>
+          <div class="field-row triple" style="margin-top:10px">
+            <div class="field-group"><label>Minor Conviction Protection (if applicable)</label><div class="radio-group"><label class="radio-label"><input type="radio" name="arc-minorConviction" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="arc-minorConviction" value="No"> No</label></div></div>
+            <div class="field-group"><label>Accident Waiver (if qualified)</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-accidentWaiverYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-accidentWaiverNo"> No</label><label class="radio-label"><input type="checkbox" id="arc-accidentWaiverDeclined"> Declined</label></div></div>
+            <div class="field-group"><label>Optional Accident Benefits</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-optionalBenefitsYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-optionalBenefitsNo"> No</label><label class="radio-label"><input type="checkbox" id="arc-optionalBenefitsDeclined"> Declined</label></div></div>
+          </div>
+          <div class="field-row triple" style="margin-top:10px">
+            <div class="field-group"><label>Accident waiver notes:</label><input type="text" id="arc-accidentWaiverNotes" placeholder="Enter notes"></div>
+            <div class="field-group"><label>Optional benefits notes:</label><input type="text" id="arc-optionalBenefitsNotes" placeholder="Enter notes"></div>
+            <div class="field-group"></div>
+          </div>
+          <div class="field-row" style="margin-top:10px">
+            <div class="field-group"><label>Liability Enhancements (2M or Umbrella Option)</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="arc-liabilityYes"> Yes</label><label class="radio-label"><input type="checkbox" id="arc-liabilityNo"> No</label><label class="radio-label"><input type="checkbox" id="arc-liabilityDeclined"> Declined</label></div></div>
+            <div class="field-group"><label>Liability notes:</label><input type="text" id="arc-liabilityNotes" placeholder="Enter notes"></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 6 - Premium Concerns and Cost-Saving Options</label>
+          <label class="radio-label"><input type="checkbox" id="arc-shopPolicy"> Shop policy if over 15% increase</label>
+          <label class="radio-label" style="margin-top:5px"><input type="checkbox" id="arc-didNotShop" onchange="showCond('arc-shopReason',this.checked)"> Did not shop 15%</label>
+          <div id="arc-shopReason" class="conditional" style="margin-top:5px"><div class="field-row single"><div class="field-group"><label>Provide reason:</label><textarea id="arc-shopReasonText" placeholder="Explain why policy was not shopped..."></textarea></div></div></div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 7 - Monoline</label>
+          <label>Monoline?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="arc-monoline" value="Yes" onchange="showCond('arc-monolineQuestion',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="arc-monoline" value="No" onchange="showCond('arc-monolineQuestion',false)"> No</label>
+          </div>
+          <div id="arc-monolineQuestion" class="conditional" style="margin-top:5px">
+            <div class="field-group"><label>Asked client if they are interested in obtaining a quote for another line of business:</label><select id="arc-monolineOffered"><option value="">Select...</option><option>Offered Home</option><option>Offered Auto</option><option>Offered Life</option><option>Offered Commercial</option></select></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 8 - Additional Review Notes</label>
+          <div class="field-row single"><div class="field-group"><textarea id="arc-additionalNotes" placeholder="Enter any additional review notes here..."></textarea></div></div>
+        </div>
+
+        <button class="btn-generate" onclick="generateNote('AutoRenewalChecklist')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AutoRenewalChecklist" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AutoRenewalChecklist')">Copy</button><button class="clear-note-btn" onclick="clearNote('AutoRenewalChecklist')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AutoRenewalChecklist" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDRESS CHANGE (Auto) =====
+         Address change form: effective date, new address, usage/commute impact,
+         new household drivers (with dynamic table), driver assignment changes, notes. -->
+    <div class="form-section" id="sec-AddressChange">
+      <div class="section-header">
+        <h2>ADDRESS CHANGE</h2>
+        <span class="section-badge">Auto</span>
+      </div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group">
+            <label>Who called/emailed:</label>
+            <input type="text" id="ac-contactedBy" placeholder="Name">
+          </div>
+          <div class="field-group">
+            <label>When did they call/email:</label>
+            <input type="text" id="ac-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026">
+          </div>
+          <button class="btn-autofill-time" onclick="autofillTime('ac-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Effective date of address change:</label>
+            <input type="date" id="ac-effectiveDate">
+          </div>
+          <div class="field-group">
+            <label>New Address:</label>
+            <input type="text" id="ac-newAddress" placeholder="Full new address">
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Will this address change affect the usage and distances driven to work?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ac-usage" value="Yes" onchange="showCond('ac-usage-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ac-usage" value="No" onchange="showCond('ac-usage-details',false)"> No</label>
+          </div>
+          <div id="ac-usage-details" class="conditional" style="margin-top:10px">
+            <textarea id="ac-usageDetails" placeholder="Note any change in use (pleasure, commute, business) and distances..."></textarea>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Are there any new drivers in the household?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ac-newdrivers" value="Yes" onchange="showCond('ac-newdrivers-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ac-newdrivers" value="No" onchange="showCond('ac-newdrivers-details',false)"> No</label>
+          </div>
+          <div id="ac-newdrivers-details" class="conditional" style="margin-top:10px">
+            <div class="warning-box">All drivers in household must be insured under OAP1</div>
+            <div class="dynamic-table" id="ac-driversTable">
+              <div class="dynamic-table-header cols3">
+                <span>New Driver Name</span><span>Insurance Carrier</span><span>Policy Number</span><span></span>
+              </div>
+            </div>
+            <button class="btn-add-row" onclick="addDriverRow('ac-driversTable')">+ Add Driver</button>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Will the address change affect driver assignment on any vehicles?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ac-driverassign" value="Yes" onchange="showCond('ac-driverassign-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ac-driverassign" value="No" onchange="showCond('ac-driverassign-details',false)"> No</label>
+          </div>
+          <div id="ac-driverassign-details" class="conditional" style="margin-top:10px">
+            <textarea id="ac-driverAssignDetails" placeholder="Note any changes to driver assignment for all vehicles..."></textarea>
+          </div>
+        </div>
+        <div class="field-row single">
+          <div class="field-group">
+            <label>Additional Notes:</label>
+            <textarea id="ac-additionalNotes" placeholder="Any additional notes..."></textarea>
+          </div>
+        </div>
+        <button class="btn-generate" onclick="generateNote('AddressChange')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddressChange" style="display:none">
+          <div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddressChange')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddressChange')">Clear</button></div></div>
+          <textarea class="note-textarea" id="notetext-AddressChange" readonly></textarea>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ===== NAME CHANGE (Auto) =====
+         Legal name amendment, reason, and whether new DL number was obtained (or set abeyance).
+         Includes incorporation warning for entity names. -->
+    <div class="form-section" id="sec-NameChange">
+      <div class="section-header"><h2>NAME CHANGE</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="nc-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="nc-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('nc-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of name change:</label><input type="date" id="nc-effectiveDate"></div>
+          <div class="field-group"><label>Amended new name:</label><input type="text" id="nc-newName" placeholder="Full legal new name"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Reason for name change:</label><textarea id="nc-reason" placeholder="e.g. Marriage, divorce, legal name change..."></textarea></div></div>
+        <div class="warning-box">We will require a copy of Article of Incorporation to verify the Named Insured is the Sole Owner. If the name is that of a legal entity, then a new policy may be required.</div>
+        <div class="question-block">
+          <label>Has the new Driver's License Number been obtained?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="nc-license" value="Yes" onchange="showCond('nc-license-num',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="nc-license" value="No" onchange="showCond('nc-license-num',false)"> No, set abeyance to obtain copy of driver's license</label>
+          </div>
+          <div id="nc-license-num" class="conditional" style="margin-top:10px">
+            <div class="field-group"><label>New Driver's License Number:</label><input type="text" id="nc-licenseNumber" placeholder="License number"></div>
+          </div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="nc-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('NameChange')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-NameChange" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('NameChange')">Copy</button><button class="clear-note-btn" onclick="clearNote('NameChange')">Clear</button></div></div><textarea class="note-textarea" id="notetext-NameChange" readonly></textarea></div>
+      </div>
+    </div>
+
+  <!-- ============================== -->
+    <!-- SUBSTITUTING A VEHICLE -->
+    <!-- ============================== -->
+    <div class="form-section" id="sec-SubstitutingVehicle">
+      <div class="section-header"><h2>SUBSTITUTING A VEHICLE</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="sv-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="sv-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('sv-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date:</label><input type="date" id="sv-effectiveDate"></div></div>
+        <div class="sub-section-title">Vehicle Being Added</div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Year:</label><input type="text" id="sv-addYear" placeholder="Year"></div>
+          <div class="field-group"><label>Make:</label><input type="text" id="sv-addMake" placeholder="Make"></div>
+          <div class="field-group"><label>Model:</label><input type="text" id="sv-addModel" placeholder="Model"></div>
+          <div class="field-group"><label>VIN:</label><input type="text" id="sv-addVin" placeholder="VIN"></div>
+        </div>
+        <div class="sub-section-title">Vehicle Being Removed</div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Year:</label><input type="text" id="sv-remYear" placeholder="Year"></div>
+          <div class="field-group"><label>Make:</label><input type="text" id="sv-remMake" placeholder="Make"></div>
+          <div class="field-group"><label>Model:</label><input type="text" id="sv-remModel" placeholder="Model"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Who is the registered owner of the added vehicle?</label><input type="text" id="sv-registeredOwner" placeholder="Name"></div></div>
+        <div class="question-block">
+          <label>Is the added vehicle leased or financed?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="sv-financial" value="Leased" onchange="showFinancial('sv','Leased')"> Leased</label>
+            <label class="radio-label"><input type="radio" name="sv-financial" value="Financed" onchange="showFinancial('sv','Financed')"> Financed</label>
+            <label class="radio-label"><input type="radio" name="sv-financial" value="Owned" onchange="showFinancial('sv','Owned')"> Owned outright</label>
+          </div>
+          <div id="sv-lessor" class="conditional" style="margin-top:10px"><div class="field-group"><label>Lessor's Name and Mailing Address:</label><textarea id="sv-lessorData" placeholder="Enter lessor details..."></textarea></div></div>
+          <div id="sv-lienholder" class="conditional" style="margin-top:10px"><div class="field-group"><label>Lienholder's Name and Mailing Address:</label><textarea id="sv-lienholderData" placeholder="Enter lienholder details..."></textarea></div></div>
+        </div>
+        <div class="question-block">
+          <label>Is the added vehicle new, used, or demo?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="sv-age" value="New" onchange="showCond('sv-age-details',true)"> New</label>
+            <label class="radio-label"><input type="radio" name="sv-age" value="Used" onchange="showCond('sv-age-details',true)"> Used</label>
+            <label class="radio-label"><input type="radio" name="sv-age" value="Demo" onchange="showCond('sv-age-details',true)"> Demo</label>
+          </div>
+          <div id="sv-age-details" class="conditional" style="margin-top:10px">
+            <div class="field-row">
+              <div class="field-group"><label>Purchase price:</label><input type="text" id="sv-purchasePrice" placeholder="$"></div>
+              <div class="field-group"><label>Mileage at purchase:</label><input type="text" id="sv-mileage" placeholder="km"></div>
+            </div>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Any modifications, customizations, or existing damage?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="sv-mods" value="Yes" onchange="showCond('sv-mods-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="sv-mods" value="No" onchange="showCond('sv-mods-details',false)"> No</label>
+          </div>
+          <div id="sv-mods-details" class="conditional" style="margin-top:8px"><textarea id="sv-modsDetail" placeholder="Please provide details..."></textarea></div>
+        </div>
+        <div class="question-block">
+          <label>Do you own winter tires that will be installed November–April?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="sv-winter" value="Yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="sv-winter" value="No"> No</label>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Principal Operator:</label><input type="text" id="sv-principalOp" placeholder="Name"></div>
+          <div class="field-group"><label>Occasional Drivers:</label><input type="text" id="sv-occasionalDrv" placeholder="Names"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Vehicle Use:</label><input type="text" id="sv-use" placeholder="Pleasure / Commute / Business"></div>
+          <div class="field-group"><label>1-way commute:</label><input type="text" id="sv-commute" placeholder="km"></div>
+          <div class="field-group"><label>Total annual km:</label><input type="text" id="sv-annualKm" placeholder="km"></div>
+        </div>
+        <div class="sub-section-title">Coverage for Substituted Vehicle</div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Liability Limit:</label><input type="text" id="sv-liability" placeholder="$"></div>
+          <div class="field-group"><label>All Perils Ded.:</label><input type="text" id="sv-allperils" placeholder="$"></div>
+          <div class="field-group"><label>Collision Ded.:</label><input type="text" id="sv-collision" placeholder="$"></div>
+          <div class="field-group"><label>Comprehensive Ded.:</label><input type="text" id="sv-comprehensive" placeholder="$"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="sv-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('SubstitutingVehicle')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-SubstitutingVehicle" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('SubstitutingVehicle')">Copy</button><button class="clear-note-btn" onclick="clearNote('SubstitutingVehicle')">Clear</button></div></div><textarea class="note-textarea" id="notetext-SubstitutingVehicle" readonly></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ADDING A VEHICLE -->
+    <!-- ============================== -->
+    <div class="form-section" id="sec-AddingVehicle">
+      <div class="section-header"><h2>ADDING A VEHICLE</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="av-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="av-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('av-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of vehicle addition:</label><input type="date" id="av-effectiveDate"></div>
+          <div class="field-group"><label>Who is the registered owner?</label><input type="text" id="av-registeredOwner" placeholder="Name of registered owner"></div>
+        </div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Year:</label><input type="text" id="av-year" placeholder="e.g. 2022"></div>
+          <div class="field-group"><label>Make:</label><input type="text" id="av-make" placeholder="e.g. Toyota"></div>
+          <div class="field-group"><label>Model:</label><input type="text" id="av-model" placeholder="e.g. Camry"></div>
+          <div class="field-group"><label>VIN:</label><input type="text" id="av-vin" placeholder="VIN number"></div>
+        </div>
+        <div class="question-block">
+          <label>Is the vehicle leased or financed?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-financial" value="Leased" onchange="showFinancial('av','Leased')"> Leased</label>
+            <label class="radio-label"><input type="radio" name="av-financial" value="Financed" onchange="showFinancial('av','Financed')"> Financed</label>
+            <label class="radio-label"><input type="radio" name="av-financial" value="Owned" onchange="showFinancial('av','Owned')"> Owned outright</label>
+          </div>
+          <div id="av-lessor" class="conditional" style="margin-top:10px"><div class="field-group"><label>Lessor's Name and Mailing Address:</label><textarea id="av-lessorData" placeholder="Enter lessor details..."></textarea></div></div>
+          <div id="av-lienholder" class="conditional" style="margin-top:10px"><div class="field-group"><label>Lienholder's Name and Mailing Address:</label><textarea id="av-lienholderData" placeholder="Enter lienholder details..."></textarea></div></div>
+        </div>
+        <div class="question-block">
+          <label>Is the vehicle new, used, or demo?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-age" value="New" onchange="showCond('av-age-details',true)"> New</label>
+            <label class="radio-label"><input type="radio" name="av-age" value="Used" onchange="showCond('av-age-details',true)"> Used</label>
+            <label class="radio-label"><input type="radio" name="av-age" value="Demo" onchange="showCond('av-age-details',true)"> Demo</label>
+          </div>
+          <div id="av-age-details" class="conditional" style="margin-top:10px">
+            <div class="field-row">
+              <div class="field-group"><label>Purchase price:</label><input type="text" id="av-purchasePrice" placeholder="$"></div>
+              <div class="field-group"><label>Mileage at purchase:</label><input type="text" id="av-mileage" placeholder="km"></div>
+            </div>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Are there any modifications, customizations, or existing damage?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-mods" value="Yes" onchange="showCond('av-mods-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-mods" value="No" onchange="showCond('av-mods-details',false)"> No</label>
+          </div>
+          <div id="av-mods-details" class="conditional" style="margin-top:10px"><textarea id="av-modsDetail" placeholder="Please provide details..."></textarea></div>
+        </div>
+        <div class="question-block">
+          <label>Do you own winter tires that will be installed November–April?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-winter" value="Yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-winter" value="No"> No</label>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="sub-section-title">Usage Confirmations</div>
+        <div class="field-row">
+          <div class="field-group"><label>Principal Operator:</label><input type="text" id="av-principalOp" placeholder="Name of principal operator"></div>
+          <div class="field-group"><label>Occasional Drivers:</label><input type="text" id="av-occasionalDrv" placeholder="Names of occasional drivers"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Vehicle Use:</label><input type="text" id="av-use" placeholder="Pleasure / Commute / Business"></div>
+          <div class="field-group"><label>1-way commute to work:</label><input type="text" id="av-commute" placeholder="km"></div>
+          <div class="field-group"><label>Total annual km driven:</label><input type="text" id="av-annualKm" placeholder="km"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Total business km driven:</label><input type="text" id="av-businessKm" placeholder="km"></div>
+          <div class="field-group"><label>Describe business use (if applicable):</label><input type="text" id="av-businessDesc" placeholder="Description of business use"></div>
+        </div>
+        <div class="question-block">
+          <label>Ride sharing (e.g. Uber, Lyft)?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-rideshare" value="Yes" onchange="showCond('av-rideshare-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-rideshare" value="No" onchange="showCond('av-rideshare-details',false)"> No</label>
+          </div>
+          <div id="av-rideshare-details" class="conditional" style="margin-top:8px"><input type="text" id="av-rideshareDetail" placeholder="Ensure eligibility – note relevant info"></div>
+        </div>
+        <div class="question-block">
+          <label>Food delivery (e.g. DoorDash, Uber Eats)?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-fooddeliv" value="Yes" onchange="showCond('av-fooddeliv-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-fooddeliv" value="No" onchange="showCond('av-fooddeliv-details',false)"> No</label>
+          </div>
+          <div id="av-fooddeliv-details" class="conditional" style="margin-top:8px"><input type="text" id="av-fooddelivDetail" placeholder="Ensure eligibility – note relevant info"></div>
+        </div>
+        <div class="question-block">
+          <label>Are there any heavy vehicles on the policy?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-heavyOnPolicy" value="Yes" onchange="showCond('av-heavyOnPolicy-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-heavyOnPolicy" value="No" onchange="showCond('av-heavyOnPolicy-details',false)"> No</label>
+          </div>
+          <div id="av-heavyOnPolicy-details" class="conditional">
+            <div class="field-row triple">
+              <div class="field-group"><label>Confirm driver license class:</label><select id="av-licenseClass"><option value="">Select class...</option><option value="G (4,501 kg to 10,999 kg)">G (4,501 kg to 10,999 kg)</option><option value="Heavy class (11,000 kg+)">Heavy class (11,000 kg+)</option></select></div>
+              <div class="field-group"><label>Minimum 3 years' experience operating similar vehicle (LOE required)?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="av-3yrExp" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="av-3yrExp" value="No"> No</label></div></div>
+            </div>
+          </div>
+          <label>Are any new heavy vehicles being added?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-newHeavyVehicles" value="Yes" onchange="showCond('av-newHeavyVehicles-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-newHeavyVehicles" value="No" onchange="showCond('av-newHeavyVehicles-details',false)"> No</label>
+          </div>
+          <div id="av-newHeavyVehicles-details" class="conditional">
+            <div class="field-row triple">
+              <div class="field-group"><label>Confirm all drivers meet license class requirements:</label><div class="radio-group"><label class="radio-label"><input type="radio" name="av-meetLicenseReq" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="av-meetLicenseReq" value="No"> No</label></div></div>
+              <div class="field-group"><label>Confirm 3 years' experience (LOE):</label><div class="radio-group"><label class="radio-label"><input type="radio" name="av-heavy3yrExp" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="av-heavy3yrExp" value="No"> No</label></div></div>
+              <div class="field-group"><label>Provide CVOR number:</label><input type="text" id="av-cvorNewHeavy" placeholder="CVOR number"></div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="sub-section-title">Coverage for Added Vehicle</div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Liability Limit:</label><input type="text" id="av-liability" placeholder="e.g. $1,000,000"></div>
+          <div class="field-group"><label>All Perils Ded.:</label><input type="text" id="av-allperils" placeholder="$"></div>
+          <div class="field-group"><label>Collision Ded.:</label><input type="text" id="av-collision" placeholder="$"></div>
+          <div class="field-group"><label>Comprehensive Ded.:</label><input type="text" id="av-comprehensive" placeholder="$"></div>
+        </div>
+        <div class="question-block">
+          <label>Accident Benefits Buy-ups?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-accbuyup" value="Yes" onchange="showCond('av-accbuyup-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-accbuyup" value="No" onchange="showCond('av-accbuyup-details',false)"> No – Standard</label>
+          </div>
+          <div id="av-accbuyup-details" class="conditional" style="margin-top:10px">
+            <div class="field-row triple">
+              <div class="field-group"><label>Income Replacement:</label><input type="text" id="av-incomeRep" placeholder="e.g. $400/week"></div>
+              <div class="field-group"><label>Medical Rehab / Attendant Care:</label><input type="text" id="av-medRehab" placeholder="Amount"></div>
+              <div class="field-group"><label>Caregiver:</label><input type="text" id="av-caregiver" placeholder="Amount"></div>
+            </div>
+            <div class="field-row triple">
+              <div class="field-group"><label>Death &amp; Funeral:</label><input type="text" id="av-deathFuneral" placeholder="Amount"></div>
+              <div class="field-group"><label>Dependent Care:</label><input type="text" id="av-dependentCare" placeholder="Amount"></div>
+              <div class="field-group"><label>Indexation Benefit:</label><input type="text" id="av-indexation" placeholder="Amount"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>OPCF 20 (Loss of Use):</label><input type="text" id="av-opcf20" placeholder="Yes / No + limit"></div>
+          <div class="field-group"><label>OPCF 27 (Liability for Damage to Non-Owned):</label><input type="text" id="av-opcf27" placeholder="Yes / No + limit"></div>
+          <div class="field-group"><label>OPCF 43 (Remove Depreciation):</label><input type="text" id="av-opcf43" placeholder="Yes / No">
+          </div>
+        </div>
+        <div id="av-opcf43-warn" class="warning-box" style="display:none">REMINDER: Confirm Eligibility! Attach the Bill of Sale to the file.</div>
+        <div class="field-row single"><div class="field-group"><label>Other coverages:</label><input type="text" id="av-otherCoverage" placeholder="Note any other coverages..."></div></div>
+        <div class="question-block">
+          <label>Will vehicle addition affect the usage/distances driven on other vehicles?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="av-affectOther" value="Yes" onchange="showCond('av-affectOther-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="av-affectOther" value="No" onchange="showCond('av-affectOther-details',false)"> No</label>
+          </div>
+          <div id="av-affectOther-details" class="conditional" style="margin-top:8px"><textarea id="av-affectOtherDetails" placeholder="Note all changes..."></textarea></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="av-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingVehicle')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingVehicle" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingVehicle')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingVehicle')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingVehicle" readonly></textarea></div>
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- REMOVING A VEHICLE -->
+    <!-- ============================== -->
+    <div class="form-section" id="sec-RemovingVehicle">
+      <div class="section-header"><h2>REMOVING A VEHICLE</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="rv-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="rv-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('rv-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of vehicle deletion:</label><input type="date" id="rv-effectiveDate"></div>
+          <div class="field-group"><label>Vehicle being deleted:</label><input type="text" id="rv-vehicle" placeholder="Year Make Model"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Why is vehicle being deleted?</label><textarea id="rv-reason" placeholder="Reason for deletion..."></textarea></div></div>
+        <div class="question-block">
+          <label>Will vehicle deletion affect usage/distances driven on other vehicles?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="rv-affectOther" value="Yes" onchange="showCond('rv-affectOther-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="rv-affectOther" value="No" onchange="showCond('rv-affectOther-details',false)"> No</label>
+          </div>
+          <div id="rv-affectOther-details" class="conditional" style="margin-top:8px"><textarea id="rv-affectOtherDetails" placeholder="Note all changes..."></textarea></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="rv-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('RemovingVehicle')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-RemovingVehicle" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('RemovingVehicle')">Copy</button><button class="clear-note-btn" onclick="clearNote('RemovingVehicle')">Clear</button></div></div><textarea class="note-textarea" id="notetext-RemovingVehicle" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDING A DRIVER (Auto) =====
+         Full driver demographics, marital/spouse insurance, G1/G2/G dates, education, heavy-vehicle
+         license/LOE/CVOR checks, MVR/Autoplus, usage impact. Largest auto form. -->
+    <div class="form-section" id="sec-AddingDriver">
+      <div class="section-header"><h2>ADDING A DRIVER</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ad-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ad-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ad-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of driver addition:</label><input type="date" id="ad-effectiveDate"></div>
+          <div class="field-group"><label>Full legal name of driver being added:</label><input type="text" id="ad-driverName" placeholder="Full name"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Driver's license number:</label><input type="text" id="ad-licenseNum" placeholder="License number"></div>
+          <div class="field-group"><label>Date of birth:</label><input type="date" id="ad-dob"></div>
+          <div class="field-group"><label>Relationship to insured:</label><input type="text" id="ad-relationship" placeholder="e.g. Spouse, child, roommate"></div>
+        </div>
+        <div class="question-block">
+          <label>Driver's marital status:</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-marital" value="Married" onchange="showCond('ad-spouse-section',true)"> Married</label>
+            <label class="radio-label"><input type="radio" name="ad-marital" value="Single" onchange="showCond('ad-spouse-section',false)"> Single</label>
+            <label class="radio-label"><input type="radio" name="ad-marital" value="Common-law" onchange="showCond('ad-spouse-section',true)"> Common-law</label>
+            <label class="radio-label"><input type="radio" name="ad-marital" value="Separated/Divorced" onchange="showCond('ad-spouse-section',false)"> Separated/Divorced</label>
+            <label class="radio-label"><input type="radio" name="ad-marital" value="Widowed" onchange="showCond('ad-spouse-section',false)"> Widowed</label>
+          </div>
+          <div id="ad-spouse-section" class="conditional" style="margin-top:10px">
+            <div class="question-block">
+              <label>Does driver's spouse have their own insurance?</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="ad-spouseInsurance" value="Yes" onchange="showCond('ad-spouse-policy',true);showCond('ad-spouse-no',false)"> Yes</label>
+                <label class="radio-label"><input type="radio" name="ad-spouseInsurance" value="No" onchange="showCond('ad-spouse-policy',false);showCond('ad-spouse-no',true)"> No</label>
+              </div>
+              <div id="ad-spouse-policy" class="conditional" style="margin-top:10px">
+                <div class="field-row triple">
+                  <div class="field-group"><label>Spouse name:</label><input type="text" id="ad-spouseName" placeholder="Spouse full name"></div>
+                  <div class="field-group"><label>Insurance carrier:</label><input type="text" id="ad-spouseCarrier" placeholder="Carrier name"></div>
+                  <div class="field-group"><label>Policy number:</label><input type="text" id="ad-spousePolicyNum" placeholder="Policy number"></div>
+                </div>
+              </div>
+              <div id="ad-spouse-no" class="conditional" style="margin-top:10px">
+                <textarea id="ad-spouseNoDetails" placeholder="Please note all details (why no insurance, etc.)..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sub-section-title">Licensing Dates</div>
+        <div class="field-row triple">
+          <div class="field-group"><label>G1 date:</label><input type="date" id="ad-g1"></div>
+          <div class="field-group"><label>G2 date:</label><input type="date" id="ad-g2"></div>
+          <div class="field-group"><label>G date:</label><input type="date" id="ad-g"></div>
+        </div>
+        <div class="warning-box">ENSURE DL HISTORY IS ON FILE</div>
+        <div class="question-block">
+          <label>Was beginner driver education completed?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-education" value="Yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ad-education" value="No"> No</label>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Are there any heavy vehicles on the policy?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-heavyOnPolicy" value="Yes" onchange="showCond('ad-heavyOnPolicy-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ad-heavyOnPolicy" value="No" onchange="showCond('ad-heavyOnPolicy-details',false)"> No</label>
+          </div>
+          <div id="ad-heavyOnPolicy-details" class="conditional">
+            <div class="field-row triple">
+              <div class="field-group"><label>Confirm driver license class:</label><select id="ad-licenseClass"><option value="">Select class...</option><option value="G (4,501 kg to 10,999 kg)">G (4,501 kg to 10,999 kg)</option><option value="Heavy class (11,000 kg+)">Heavy class (11,000 kg+)</option></select></div>
+              <div class="field-group"><label>Minimum 3 years' experience operating similar vehicle (LOE required)?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="ad-3yrExp" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="ad-3yrExp" value="No"> No</label></div></div>
+            </div>
+          </div>
+          <label>Are any new heavy vehicles being added?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-newHeavyVehicles" value="Yes" onchange="showCond('ad-newHeavyVehicles-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ad-newHeavyVehicles" value="No" onchange="showCond('ad-newHeavyVehicles-details',false)"> No</label>
+          </div>
+          <div id="ad-newHeavyVehicles-details" class="conditional">
+            <div class="field-row triple">
+              <div class="field-group"><label>Confirm all drivers meet license class requirements:</label><div class="radio-group"><label class="radio-label"><input type="radio" name="ad-meetLicenseReq" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="ad-meetLicenseReq" value="No"> No</label></div></div>
+              <div class="field-group"><label>Confirm 3 years' experience (LOE):</label><div class="radio-group"><label class="radio-label"><input type="radio" name="ad-heavy3yrExp" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="ad-heavy3yrExp" value="No"> No</label></div></div>
+              <div class="field-group"><label>Provide CVOR number:</label><input type="text" id="ad-cvorNewHeavy" placeholder="CVOR number"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Why is the driver being added?</label><textarea id="ad-reason" placeholder="Reason for adding driver..."></textarea></div></div>
+        <div class="question-block">
+          <label>Was MVR and Autoplus pulled?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-mvr" value="Yes"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ad-mvr" value="No"> No</label>
+          </div>
+          <div class="warning-box" style="margin-top:8px">Ensure to pull MVR and Autoplus</div>
+        </div>
+        <div class="question-block">
+          <label>Will driver addition affect usage/distances driven on any vehicles?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ad-affectUsage" value="Yes" onchange="showCond('ad-usage-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="ad-affectUsage" value="No" onchange="showCond('ad-usage-details',false)"> No</label>
+          </div>
+          <div id="ad-usage-details" class="conditional" style="margin-top:8px"><textarea id="ad-usageDetails" placeholder="Note all changes..."></textarea></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ad-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingDriver')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingDriver" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingDriver')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingDriver')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingDriver" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== REMOVING A DRIVER (Auto) =====
+         Driver being removed, reason, whether they remain in household (own insurance?), usage impact. -->
+    <div class="form-section" id="sec-RemovingDriver">
+      <div class="section-header"><h2>REMOVING A DRIVER</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="rd-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="rd-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('rd-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of driver removal:</label><input type="date" id="rd-effectiveDate"></div>
+          <div class="field-group"><label>Driver being removed:</label><input type="text" id="rd-driverName" placeholder="Full name"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Reason for driver being removed:</label><textarea id="rd-reason" placeholder="Reason..."></textarea></div></div>
+        <div class="question-block">
+          <label>Will the driver remain in the household?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="rd-remain" value="Yes" onchange="showCond('rd-remain-section',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="rd-remain" value="No" onchange="showCond('rd-remain-section',false)"> No</label>
+          </div>
+          <div id="rd-remain-section" class="conditional" style="margin-top:10px">
+            <div class="question-block">
+              <label>Does driver have their own insurance policy?</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="rd-ownInsurance" value="Yes" onchange="showCond('rd-own-insurance-details',true);showCond('rd-no-insurance',false)"> Yes</label>
+                <label class="radio-label"><input type="radio" name="rd-ownInsurance" value="No" onchange="showCond('rd-own-insurance-details',false);showCond('rd-no-insurance',true)"> No</label>
+              </div>
+              <div id="rd-own-insurance-details" class="conditional" style="margin-top:10px">
+                <div class="field-row">
+                  <div class="field-group"><label>Insurance carrier:</label><input type="text" id="rd-insuranceCarrier" placeholder="Carrier name"></div>
+                  <div class="field-group"><label>Policy number:</label><input type="text" id="rd-policyNum" placeholder="Policy number"></div>
+                </div>
+              </div>
+              <div id="rd-no-insurance" class="conditional" style="margin-top:10px">
+                <textarea id="rd-noInsuranceDetails" placeholder="Please provide details below..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="question-block">
+          <label>Will driver removal affect usage/distances driven on any vehicles?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="rd-affectUsage" value="Yes" onchange="showCond('rd-usage-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="rd-affectUsage" value="No" onchange="showCond('rd-usage-details',false)"> No</label>
+          </div>
+          <div id="rd-usage-details" class="conditional" style="margin-top:8px"><textarea id="rd-usageDetails" placeholder="Note all changes..."></textarea></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="rd-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('RemovingDriver')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-RemovingDriver" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('RemovingDriver')">Copy</button><button class="clear-note-btn" onclick="clearNote('RemovingDriver')">Clear</button></div></div><textarea class="note-textarea" id="notetext-RemovingDriver" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADD / REMOVE / AMEND INTERESTED PARTY – AUTO =====
+         Lienholder or Lessor add/remove/amend; release-of-interest reminder for removals. -->
+    <div class="form-section" id="sec-InterestedParty">
+      <div class="section-header"><h2>ADD, REMOVE, AMEND INTERESTED PARTY – AUTO</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="warning-box">A release of Interested is required for removing mortgagee's. Please ensure you have this document saved to the file/notes</div>
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ip-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ip-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ip-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="ip-effectiveDate"></div></div>
+        <div class="question-block">
+          <label>Is this an addition, removal, or amendment?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ip-type" value="Addition" onchange="showIPDetails('ip','add')"> Addition</label>
+            <label class="radio-label"><input type="radio" name="ip-type" value="Removal" onchange="showIPDetails('ip','rem')"> Removal</label>
+            <label class="radio-label"><input type="radio" name="ip-type" value="Amendment" onchange="showIPDetails('ip','amend')"> Amendment</label>
+          </div>
+        </div>
+        <div id="ip-addition-details" class="conditional">
+          <div class="question-block">
+            <label>Type of financial interest:</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="ip-fintype" value="Lienholder"> Lienholder</label>
+              <label class="radio-label"><input type="radio" name="ip-fintype" value="Lessor"> Lessor</label>
+            </div>
+          </div>
+          <div class="field-group" style="margin-bottom:12px"><label>Financial Interest name and mailing address:</label><textarea id="ip-finAddress" placeholder="Name and mailing address..."></textarea></div>
+        </div>
+        <div id="ip-removal-details" class="conditional">
+          <div class="field-group" style="margin-bottom:12px"><label>Please provide removal details:</label><textarea id="ip-removalDetails" placeholder="Details about the removal..."></textarea></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ip-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('InterestedParty')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-InterestedParty" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('InterestedParty')">Copy</button><button class="clear-note-btn" onclick="clearNote('InterestedParty')">Clear</button></div></div><textarea class="note-textarea" id="notetext-InterestedParty" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== AMEND RATING OR LICENSE CLASS (Auto) =====
+         Rating (km/commute) and/or license-class changes with effective date and free-text details. -->
+    <div class="form-section" id="sec-AmendRating">
+      <div class="section-header"><h2>AMEND RATING OR LICENSE CLASS</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ar-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ar-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ar-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of change:</label><input type="date" id="ar-effectiveDate"></div>
+          <div class="field-group">
+            <label>What is being amended?</label>
+            <div class="radio-group" style="margin-top:6px">
+              <label class="radio-label"><input type="radio" name="ar-amendType" value="Rating"> Rating</label>
+              <label class="radio-label"><input type="radio" name="ar-amendType" value="License Class"> License Class</label>
+              <label class="radio-label"><input type="radio" name="ar-amendType" value="Both"> Both</label>
+            </div>
+          </div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Change in km driven (1-way commute / total annual km):</label><textarea id="ar-rating" placeholder="e.g. Commute changed from 15km to 30km one-way, total annual from 20,000 to 30,000km..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Driver and change of license class (obtain Driver's License Abstract):</label><textarea id="ar-licenseClass" placeholder="Driver name and new license class..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ar-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AmendRating')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AmendRating" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AmendRating')">Copy</button><button class="clear-note-btn" onclick="clearNote('AmendRating')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AmendRating" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDING DISCOUNT – AUTO =====
+         Add or remove multiline, winter-tire, retiree, multi-vehicle discounts (toggle panels + proof reminders). -->
+    <div class="form-section" id="sec-AddingDiscountAuto">
+      <div class="section-header"><h2>ADDING DISCOUNT – AUTO</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="da-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="da-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('da-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="question-block">
+          <label>Are you adding or removing a discount?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="da-switch" value="Add"> Add</label>
+            <label class="radio-label"><input type="radio" name="da-switch" value="Remove"> Remove</label>
+          </div>
+        </div>
+        <div class="sub-section-title">Select Discounts</div>
+        <div class="toggle-section" id="da-multiline-toggle">
+          <div class="toggle-header" onclick="toggleSection2('da-multiline-toggle')">
+            <input type="checkbox" id="da-multiline" onclick="event.stopPropagation()"> &nbsp; Multiline Discount <span class="toggle-arrow">▶</span>
+          </div>
+          <div class="toggle-body">
+            <div class="field-row">
+              <div class="field-group"><label>Cross-reference policy number:</label><input type="text" id="da-multilinePolicyNum" placeholder="Policy number"></div>
+              <div class="field-group"><label>Additional details:</label><input type="text" id="da-multilineDetails" placeholder="Details..."></div>
+            </div>
+          </div>
+        </div>
+        <div class="toggle-section" id="da-winter-toggle">
+          <div class="toggle-header" onclick="toggleSection2('da-winter-toggle')">
+            <input type="checkbox" id="da-winter" onclick="event.stopPropagation()"> &nbsp; Winter Tire Discount <span class="toggle-arrow">▶</span>
+          </div>
+          <div class="toggle-body">
+            <div class="warning-box">REMINDER: Please ensure to attach proof of purchase to file</div>
+            <div class="field-group"><label>Additional details:</label><input type="text" id="da-winterDetails" placeholder="Details..."></div>
+          </div>
+        </div>
+        <div class="toggle-section" id="da-retiree-toggle">
+          <div class="toggle-header" onclick="toggleSection2('da-retiree-toggle')">
+            <input type="checkbox" id="da-retiree" onclick="event.stopPropagation()"> &nbsp; Retiree Discount <span class="toggle-arrow">▶</span>
+          </div>
+          <div class="toggle-body">
+            <div class="warning-box">REMINDER: Have signed declaration on file</div>
+            <div class="field-group"><label>Additional details:</label><input type="text" id="da-retireeDetails" placeholder="Details..."></div>
+          </div>
+        </div>
+        <div class="toggle-section" id="da-multiveh-toggle">
+          <div class="toggle-header" onclick="toggleSection2('da-multiveh-toggle')">
+            <input type="checkbox" id="da-multiveh" onclick="event.stopPropagation()"> &nbsp; Multi-Vehicle Discount <span class="toggle-arrow">▶</span>
+          </div>
+          <div class="toggle-body">
+            <div class="field-row">
+              <div class="field-group"><label>Cross-reference policy number:</label><input type="text" id="da-multivehPolicyNum" placeholder="Policy number"></div>
+              <div class="field-group"><label>Additional details:</label><input type="text" id="da-multivehDetails" placeholder="Details..."></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="da-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingDiscountAuto')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingDiscountAuto" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingDiscountAuto')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingDiscountAuto')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingDiscountAuto" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDING A NAMED INSURED (Property) =====
+         Person details, type (Additional vs Named), DOB/occupation/relationship, interest, reason.
+         Article-of-incorporation warning for company ownership changes. -->
+    <div class="form-section" id="sec-AddingNamedInsured">
+      <div class="section-header"><h2>ADDING A NAMED INSURED</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="warning-box">An article of Incorporation is required to verify ownership of the company. Please ensure it is attached and in the correct company name. If the company is sold or changes ownership, the policy MUST be cancelled and rewritten under the new name</div>
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ani-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ani-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ani-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Full legal name of person being added:</label><input type="text" id="ani-fullName" placeholder="Full legal name"></div>
+          <div class="field-group"><label>Current address:</label><input type="text" id="ani-currentAddress" placeholder="Current address"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of addition:</label><input type="date" id="ani-effectiveDate"></div>
+          <div class="field-group">
+            <label>Type of addition:</label>
+            <div class="radio-group" style="margin-top:6px">
+              <label class="radio-label"><input type="radio" name="ani-type" value="Additional Insured"> Additional Insured</label>
+              <label class="radio-label"><input type="radio" name="ani-type" value="Named Insured"> Named Insured</label>
+            </div>
+          </div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Date of birth:</label><input type="date" id="ani-dob"></div>
+          <div class="field-group"><label>Occupation:</label><input type="text" id="ani-occupation" placeholder="Occupation"></div>
+          <div class="field-group"><label>Relationship to named insured:</label><input type="text" id="ani-relationship" placeholder="e.g. Spouse, child"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Insurance carrier (if any):</label><input type="text" id="ani-carrier" placeholder="Carrier name"></div>
+          <div class="field-group"><label>Policy number (if any):</label><input type="text" id="ani-policyNum" placeholder="Policy number"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Interest of added individual:</label><input type="text" id="ani-interest" placeholder="e.g. Joint ownership, mortgage..."></div></div>
+        <div class="field-row single"><div class="field-group"><label>Why is this person being added?</label><textarea id="ani-reason" placeholder="Reason..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ani-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingNamedInsured')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingNamedInsured" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingNamedInsured')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingNamedInsured')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingNamedInsured" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDING A NAMED INSURED (Auto) =====
+         Mirror of property named-insured form for auto policies (same fields + incorporation warning). -->
+    <div class="form-section" id="sec-AddingNamedInsuredAuto">
+      <div class="section-header"><h2>ADDING A NAMED INSURED</h2><span class="section-badge">Auto</span></div>
+      <div class="section-body">
+        <div class="warning-box">An article of Incorporation is required to verify ownership of the company. Please ensure it is attached and in the correct company name. If the company is sold or changes ownership, the policy MUST be cancelled and rewritten under the new name</div>
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ania-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ania-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ania-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Full legal name of person being added:</label><input type="text" id="ania-fullName" placeholder="Full legal name"></div>
+          <div class="field-group"><label>Current address:</label><input type="text" id="ania-currentAddress" placeholder="Current address"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Effective date of addition:</label><input type="date" id="ania-effectiveDate"></div>
+          <div class="field-group">
+            <label>Type of addition:</label>
+            <div class="radio-group" style="margin-top:6px">
+              <label class="radio-label"><input type="radio" name="ania-type" value="Additional Insured"> Additional Insured</label>
+              <label class="radio-label"><input type="radio" name="ania-type" value="Named Insured"> Named Insured</label>
+            </div>
+          </div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Date of birth:</label><input type="date" id="ania-dob"></div>
+          <div class="field-group"><label>Occupation:</label><input type="text" id="ania-occupation" placeholder="Occupation"></div>
+          <div class="field-group"><label>Relationship to named insured:</label><input type="text" id="ania-relationship" placeholder="e.g. Spouse, child"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Insurance carrier (if any):</label><input type="text" id="ania-carrier" placeholder="Carrier name"></div>
+          <div class="field-group"><label>Policy number (if any):</label><input type="text" id="ania-policyNum" placeholder="Policy number"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Interest of added individual:</label><input type="text" id="ania-interest" placeholder="e.g. Joint ownership, mortgage..."></div></div>
+        <div class="field-row single"><div class="field-group"><label>Why is this person being added?</label><textarea id="ania-reason" placeholder="Reason..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ania-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingNamedInsuredAuto')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingNamedInsuredAuto" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingNamedInsuredAuto')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingNamedInsuredAuto')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingNamedInsuredAuto" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADD / SUB LOCATION – HOMEOWNERS =====
+         Addition or substitution of a dwelling: addresses/dates, replacement cost, deed names,
+         mortgagee (standard/private), full COPE building details, liability exposures, limits. -->
+    <div class="form-section" id="sec-HomeownersLocation">
+      <div class="section-header"><h2>ADDING OR SUBBING A LOCATION – HOMEOWNERS</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="hl-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="hl-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('hl-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="warning-box">PLEASE ENSURE ELIGIBILITY OF ADDITION</div>
+        <div class="question-block">
+          <label>Type of change:</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="hl-changetype" value="Addition"> Addition only</label>
+            <label class="radio-label"><input type="radio" name="hl-changetype" value="Substitution"> Substitution</label>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Address being removed (if substitution):</label><input type="text" id="hl-removedAddress" placeholder="Address being removed"></div>
+          <div class="field-group"><label>Effective date of deletion:</label><input type="date" id="hl-deletionDate"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>New address being added:</label><input type="text" id="hl-newAddress" placeholder="Full new address"></div>
+          <div class="field-group"><label>Effective date of addition:</label><input type="date" id="hl-additionDate"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Explanation if dates differ:</label><input type="text" id="hl-datesDiff" placeholder="Explain discrepancy..."></div></div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Replacement cost:</label><input type="text" id="hl-replacementCost" placeholder="$"></div>
+          <div class="field-group"><label>Year built:</label><input type="text" id="hl-yearBuilt" placeholder="Year"></div>
+          <div class="field-group"><label>Names on deed (and relationship):</label><input type="text" id="hl-deedNames" placeholder="Names and relationship"></div>
+        </div>
+        <div class="question-block">
+          <label>Is there a mortgage on the added property?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="hl-mortgage" value="Yes" onchange="showCond('hl-mortgage-details',true)"> Yes</label>
+            <label class="radio-label"><input type="radio" name="hl-mortgage" value="No" onchange="showCond('hl-mortgage-details',false)"> No</label>
+          </div>
+          <div id="hl-mortgage-details" class="conditional" style="margin-top:10px">
+            <div class="question-block">
+              <label>Type of mortgage:</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="hl-mortgagetype" value="Standard"> Standard</label>
+                <label class="radio-label"><input type="radio" name="hl-mortgagetype" value="Non-standard/Private" onchange="showCond('hl-nonstandard',true)"> Non-standard / Private</label>
+              </div>
+            </div>
+            <div class="field-group" style="margin-bottom:10px"><label>Mortgagee Name and mailing address:</label><textarea id="hl-mortgageeAddress" placeholder="Name and address..."></textarea></div>
+            <div id="hl-nonstandard" class="conditional">
+              <div class="warning-box">Prior to referring a non-standard or private lender, additional information is required.</div>
+              <div class="field-row">
+                <div class="field-group"><label>Reason for loan:</label><input type="text" id="hl-nsReason" placeholder="Reason"></div>
+                <div class="field-group"><label>Loan amount, term, interest rate:</label><input type="text" id="hl-nsTerms" placeholder="Details"></div>
+              </div>
+              <div class="field-row triple">
+                <div class="field-group"><label>Loan registration #:</label><input type="text" id="hl-nsNumber" placeholder="#"></div>
+                <div class="field-group"><label>Insured's relationship with lender:</label><input type="text" id="hl-nsRelationship" placeholder="Relationship"></div>
+                <div class="field-group"><label>Existing mortgage balance:</label><input type="text" id="hl-nsBalance" placeholder="$"></div>
+              </div>
+              <div class="field-row">
+                <div class="field-group"><label>Property current market value:</label><input type="text" id="hl-nsValue" placeholder="$"></div>
+                <div class="field-group"><label>Lender's name and address:</label><input type="text" id="hl-nsLender" placeholder="Name and address"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="sub-section-title">Building Details</div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Construction type:</label><input type="text" id="hl-construction" placeholder="e.g. Frame, Brick"></div>
+          <div class="field-group"><label>Exterior finish:</label><input type="text" id="hl-exterior" placeholder="e.g. Vinyl, Brick"></div>
+          <div class="field-group"><label>Structure type:</label><input type="text" id="hl-structure" placeholder="e.g. Detached"></div>
+          <div class="field-group"><label>Garage type:</label><input type="text" id="hl-garage" placeholder="e.g. None, Attached"></div>
+        </div>
+        <div class="field-row" style="grid-template-columns: repeat(6,1fr); gap:8px">
+          <div class="field-group"><label>Storeys:</label><input type="text" id="hl-storeys" placeholder="#"></div>
+          <div class="field-group"><label>Kitchens:</label><input type="text" id="hl-kitchens" placeholder="#"></div>
+          <div class="field-group"><label>Full Baths:</label><input type="text" id="hl-fullbaths" placeholder="#"></div>
+          <div class="field-group"><label>Half Baths:</label><input type="text" id="hl-halfbaths" placeholder="#"></div>
+          <div class="field-group"><label>Units:</label><input type="text" id="hl-units" placeholder="#"></div>
+          <div class="field-group"><label>Families:</label><input type="text" id="hl-families" placeholder="#"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Electrical (year / % / type / service / panel):</label><input type="text" id="hl-electrical" placeholder="e.g. 2005 / 100% / Copper / 200A / Breakers"></div>
+          <div class="field-group"><label>Plumbing (year / % / type / WH year / shutoff):</label><input type="text" id="hl-plumbing" placeholder="e.g. 2010 / 100% / Copper"></div>
+          <div class="field-group"><label>Roofing (year / % / type):</label><input type="text" id="hl-roofing" placeholder="e.g. 2018 / 100% / Asphalt Shingles"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Heating (year / % / type):</label><input type="text" id="hl-heating" placeholder="e.g. 2015 / 100% / Central Furnace – Gas"></div>
+          <div class="field-group"><label>Auxiliary heating:</label><input type="text" id="hl-auxHeating" placeholder="e.g. Wood stove in basement"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Meters to hydrant:</label><input type="text" id="hl-hydrant" placeholder="meters"></div>
+          <div class="field-group"><label>Km to fire hall/shuttle tanker:</label><input type="text" id="hl-firehall" placeholder="km"></div>
+        </div>
+        <hr class="divider">
+        <div class="sub-section-title">Liability Exposures</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px">
+          <label class="checkbox-label"><input type="checkbox" id="hl-pool"> Swimming Pool</label>
+          <label class="checkbox-label"><input type="checkbox" id="hl-dogs"> Dogs</label>
+          <label class="checkbox-label"><input type="checkbox" id="hl-homebiz"> Home Based Business</label>
+          <label class="checkbox-label"><input type="checkbox" id="hl-adjbiz"> Adjacent Business</label>
+          <label class="checkbox-label"><input type="checkbox" id="hl-tenants"> Tenants / Roommate / Boarders / Airbnb</label>
+          <label class="checkbox-label"><input type="checkbox" id="hl-renos"> Planned Renovations or Vacancy</label>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Liability exposure details:</label><textarea id="hl-exposureDetails" placeholder="Details for any checked exposures..."></textarea></div></div>
+        <div class="field-row quad">
+          <div class="field-group"><label>Liability limit:</label><input type="text" id="hl-liabilityLimit" placeholder="$"></div>
+          <div class="field-group"><label>Deductible:</label><input type="text" id="hl-deductible" placeholder="$"></div>
+          <div class="field-group"><label>Sewer backup:</label><input type="text" id="hl-sewerBackup" placeholder="Yes / No + $"></div>
+          <div class="field-group"><label>Overland water:</label><input type="text" id="hl-overlandWater" placeholder="Yes / No + $"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="hl-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('HomeownersLocation')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-HomeownersLocation" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('HomeownersLocation')">Copy</button><button class="clear-note-btn" onclick="clearNote('HomeownersLocation')">Clear</button></div></div><textarea class="note-textarea" id="notetext-HomeownersLocation" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADD / SUB LOCATION – RENTAL (simplified) =====
+         Rental/condo-style location change: addresses, I&B/contents limits, purchase price,
+         year built, liability/deductible/sewer backup. Fewer COPE fields than homeowners. -->
+    <div class="form-section" id="sec-CondoLocation">
+      <div class="section-header"><h2>ADDING OR SUBBING A LOCATION – RENTAL</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="cl-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="cl-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('cl-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="warning-box">PLEASE ENSURE ELIGIBILITY OF ADDITION</div>
+        <div class="field-row">
+          <div class="field-group"><label>Address being removed (if substitution):</label><input type="text" id="cl-removedAddress" placeholder="Address being removed"></div>
+          <div class="field-group"><label>Effective date of deletion:</label><input type="date" id="cl-deletionDate"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>New address being added:</label><input type="text" id="cl-newAddress" placeholder="Full new address"></div>
+          <div class="field-group"><label>Effective date of addition:</label><input type="date" id="cl-additionDate"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Improvements &amp; Betterments Limit:</label><input type="text" id="cl-improvementsLimit" placeholder="$"></div>
+          <div class="field-group"><label>Contents Limit:</label><input type="text" id="cl-contentsLimit" placeholder="$"></div>
+          <div class="field-group"><label>Purchase price:</label><input type="text" id="cl-replacementCost" placeholder="$"></div>
+        </div>
+        <div class="field-row">
+          <div class="field-group"><label>Year built:</label><input type="text" id="cl-yearBuilt" placeholder="Year"></div>
+          <div class="field-group"><label>Names on deed (and relationship):</label><input type="text" id="cl-deedNames" placeholder="Names and relationship"></div>
+        </div>
+        <div class="field-row triple">
+          <div class="field-group"><label>Liability limit:</label><input type="text" id="cl-liabilityLimit" placeholder="$"></div>
+          <div class="field-group"><label>Deductible:</label><input type="text" id="cl-deductible" placeholder="$"></div>
+          <div class="field-group"><label>Sewer backup:</label><input type="text" id="cl-sewerBackup" placeholder="Yes / No + $"></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="cl-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('CondoLocation')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-CondoLocation" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('CondoLocation')">Copy</button><button class="clear-note-btn" onclick="clearNote('CondoLocation')">Clear</button></div></div><textarea class="note-textarea" id="notetext-CondoLocation" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== REMOVING A LOCATION (Property) =====
+         Effective date, risk/address being deleted, and reason for deletion. -->
+    <div class="form-section" id="sec-RemovingLocation">
+      <div class="section-header"><h2>REMOVING A LOCATION</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="rl-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="rl-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('rl-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="rl-effectiveDate"></div></div>
+        <div class="field-row single"><div class="field-group"><label>Risk being deleted:</label><textarea id="rl-details" placeholder="Address and details of location being removed..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Reason for deletion:</label><textarea id="rl-reason" placeholder="Reason..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="rl-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('RemovingLocation')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-RemovingLocation" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('RemovingLocation')">Copy</button><button class="clear-note-btn" onclick="clearNote('RemovingLocation')">Clear</button></div></div><textarea class="note-textarea" id="notetext-RemovingLocation" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== AMEND COVERAGE – PROPERTY =====
+         Effective date, location(s), free-text coverage change (limits), and reason. -->
+    <div class="form-section" id="sec-CoverageChange">
+      <div class="section-header"><h2>AMEND COVERAGE – PROPERTY</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="cc-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="cc-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('cc-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="cc-effectiveDate"></div></div>
+        <div class="field-row single"><div class="field-group"><label>Location(s) for coverage change:</label><input type="text" id="cc-locations" placeholder="Address(es)"></div></div>
+        <div class="field-row single"><div class="field-group"><label>Change requested (including limits):</label><textarea id="cc-details" placeholder="Describe coverage change in detail..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Reason for change:</label><textarea id="cc-reason" placeholder="Reason..."></textarea></div></div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="cc-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('CoverageChange')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-CoverageChange" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('CoverageChange')">Copy</button><button class="clear-note-btn" onclick="clearNote('CoverageChange')">Clear</button></div></div><textarea class="note-textarea" id="notetext-CoverageChange" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADD / REMOVE / AMEND MORTGAGEE (Property) =====
+         Mortgagee add/remove/amend with standard vs non-standard/private lender details and release reminder. -->
+    <div class="form-section" id="sec-InterestedPartyProperty">
+      <div class="section-header"><h2>ADD, REMOVE, AMEND MORTGAGEE</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="warning-box">A release of Interested is required for removing mortgagee's. Please ensure you have this document saved to the file/notes</div>
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="ipp-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="ipp-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('ipp-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="ipp-effectiveDate"></div></div>
+        <div class="question-block">
+          <label>Is this an addition, removal, or amendment?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="ipp-type" value="Addition" onchange="showCond('ipp-mortg-details',true)"> Addition</label>
+            <label class="radio-label"><input type="radio" name="ipp-type" value="Removal" onchange="showCond('ipp-mortg-details',false)"> Removal</label>
+            <label class="radio-label"><input type="radio" name="ipp-type" value="Amendment" onchange="showCond('ipp-mortg-details',true)"> Amendment</label>
+          </div>
+        </div>
+        <div id="ipp-mortg-details" class="conditional">
+          <div class="question-block">
+            <label>Is the new mortgagee:</label>
+            <div class="radio-group">
+              <label class="radio-label"><input type="radio" name="ipp-mortgtype" value="Standard"> Standard</label>
+              <label class="radio-label"><input type="radio" name="ipp-mortgtype" value="Non-standard/Private" onchange="showCond('ipp-nonstandard',true)"> Non-standard / Private</label>
+            </div>
+          </div>
+          <div class="field-group" style="margin-bottom:12px"><label>New financial interest name and mailing address:</label><textarea id="ipp-mortgAddress" placeholder="Name and address..."></textarea></div>
+          <div id="ipp-nonstandard" class="conditional">
+            <div class="warning-box">Prior to referring a non-standard or private lender, additional information is required.</div>
+            <div class="field-row">
+              <div class="field-group"><label>Reason for loan:</label><input type="text" id="ipp-nsReason" placeholder="Reason"></div>
+              <div class="field-group"><label>Loan amount, term, interest rate:</label><input type="text" id="ipp-nsTerms" placeholder="Details"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="ipp-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('InterestedPartyProperty')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-InterestedPartyProperty" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('InterestedPartyProperty')">Copy</button><button class="clear-note-btn" onclick="clearNote('InterestedPartyProperty')">Clear</button></div></div><textarea class="note-textarea" id="notetext-InterestedPartyProperty" readonly></textarea></div>
+      </div>
+    </div>
+
+
+    <!-- ===== ADDING DISCOUNT – PROPERTY =====
+         Add/remove multiline, non-smoker, retiree, water-mitigation, monitored burglar/fire alarm discounts. -->
+    <div class="form-section" id="sec-AddingDiscountProperty">
+      <div class="section-header"><h2>ADDING DISCOUNT – PROPERTY</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="contact-row">
+          <div class="field-group"><label>Who called/emailed:</label><input type="text" id="dp-contactedBy" placeholder="Name"></div>
+          <div class="field-group"><label>When did they call/email:</label><input type="text" id="dp-contactedTime" placeholder="e.g. 2:30 pm on April 13, 2026"></div>
+          <button class="btn-autofill-time" onclick="autofillTime('dp-contactedTime')">Now ⏱</button>
+        </div>
+        <div class="question-block">
+          <label>Are you adding or removing a discount?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="dp-switch" value="Add"> Add</label>
+            <label class="radio-label"><input type="radio" name="dp-switch" value="Remove"> Remove</label>
+          </div>
+        </div>
+        <div class="sub-section-title">Select Discounts</div>
+        <div class="toggle-section" id="dp-multiline-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-multiline-toggle')"><input type="checkbox" id="dp-multiline" onclick="event.stopPropagation()"> &nbsp; Multiline Discount <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body"><div class="field-row"><div class="field-group"><label>Cross-reference policy number:</label><input type="text" id="dp-multilinePolicyNum" placeholder="Policy number"></div><div class="field-group"><label>Details:</label><input type="text" id="dp-multilineDetails" placeholder="Details..."></div></div></div>
+        </div>
+        <div class="toggle-section" id="dp-nonsmoker-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-nonsmoker-toggle')"><input type="checkbox" id="dp-nonsmoker" onclick="event.stopPropagation()"> &nbsp; Non-Smoker Discount <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body"><div class="warning-box">REMINDER: Have signed declaration on file</div><div class="field-group"><label>Details:</label><input type="text" id="dp-nonsmokerDetails" placeholder="Details..."></div></div>
+        </div>
+        <div class="toggle-section" id="dp-retiree-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-retiree-toggle')"><input type="checkbox" id="dp-retiree" onclick="event.stopPropagation()"> &nbsp; Retiree Discount <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body"><div class="warning-box">REMINDER: Have signed declaration on file</div><div class="field-group"><label>Details:</label><input type="text" id="dp-retireeDetails" placeholder="Details..."></div></div>
+        </div>
+        <div class="toggle-section" id="dp-water-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-water-toggle')"><input type="checkbox" id="dp-water" onclick="event.stopPropagation()"> &nbsp; Water Mitigation Discount <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body">
+            <div class="field-row triple">
+              <div class="field-group"><label>Sump pump:</label><input type="text" id="dp-sumpPump" placeholder="Yes / No"></div>
+              <div class="field-group"><label>Alarmed sump pump:</label><input type="text" id="dp-alarmedSump" placeholder="Yes / No"></div>
+              <div class="field-group"><label>Type:</label><input type="text" id="dp-waterType" placeholder="Type"></div>
+            </div>
+            <div class="field-group"><label>Details:</label><input type="text" id="dp-waterDetails" placeholder="Details..."></div>
+          </div>
+        </div>
+        <div class="toggle-section" id="dp-alarm-burglar-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-alarm-burglar-toggle')"><input type="checkbox" id="dp-alarmBurglar" onclick="event.stopPropagation()"> &nbsp; Monitored Alarm – Burglar <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body"><div class="field-row"><div class="field-group"><label>Alarm type:</label><input type="text" id="dp-alarmBurglarType" placeholder="Type"></div><div class="field-group"><label>Details:</label><input type="text" id="dp-alarmBurglarDetails" placeholder="Details..."></div></div></div>
+        </div>
+        <div class="toggle-section" id="dp-alarm-fire-toggle">
+          <div class="toggle-header" onclick="toggleSection2('dp-alarm-fire-toggle')"><input type="checkbox" id="dp-alarmFire" onclick="event.stopPropagation()"> &nbsp; Monitored Alarm – Fire <span class="toggle-arrow">▶</span></div>
+          <div class="toggle-body"><div class="field-row"><div class="field-group"><label>Alarm type:</label><input type="text" id="dp-alarmFireType" placeholder="Type"></div><div class="field-group"><label>Details:</label><input type="text" id="dp-alarmFireDetails" placeholder="Details..."></div></div></div>
+        </div>
+        <div class="field-row single"><div class="field-group"><label>Additional Notes:</label><textarea id="dp-additionalNotes" placeholder="Any additional notes..."></textarea></div></div>
+        <button class="btn-generate" onclick="generateNote('AddingDiscountProperty')">▶ Generate Note</button>
+        <div class="note-output-area" id="note-AddingDiscountProperty" style="display:none"><div class="note-output-header"><span>Generated Note</span><div class="note-output-actions"><button class="copy-btn" onclick="copyNote('AddingDiscountProperty')">Copy</button><button class="clear-note-btn" onclick="clearNote('AddingDiscountProperty')">Clear</button></div></div><textarea class="note-textarea" id="notetext-AddingDiscountProperty" readonly></textarea></div>
+      </div>
+    </div>
+
+    <!-- ===== PROPERTY RENEWAL =====
+         Full renewal checklist: named insureds, addresses, COPE updates, coverages/deductibles,
+         water damage, additional coverages, discounts, shopping for large increases, monoline cross-sell. -->
+    <div class="form-section" id="sec-PropertyRenewal">
+      <div class="section-header"><h2>PROPERTY RENEWAL</h2><span class="section-badge">Property</span></div>
+      <div class="section-body">
+        <div class="question-block">
+          <label style="font-weight:700">Property Renewal Checklist Details</label>
+          <div class="field-row triple">
+            <div class="field-group"><label>Client name:</label><input type="text" id="pr-clientName" placeholder="Client name"></div>
+            <div class="field-group"><label>Policy number(s):</label><input type="text" id="pr-policyNumbers" placeholder="Policy numbers"></div>
+            <div class="field-group"><label>Date of review:</label><input type="date" id="pr-reviewDate"></div>
+          </div>
+          <div class="field-row triple">
+            <div class="field-group"><label>Account manager:</label><input type="text" id="pr-accountManager" placeholder="Account manager"></div>
+            <div class="field-group"><label>Renewal percentage increase:</label><input type="text" id="pr-percentageIncrease" placeholder="e.g. 9.0%"></div>
+            <div class="field-group"><label>Property type:</label><select id="pr-policyType"><option value="">Select...</option><option>Homeowner</option><option>Secondary</option><option>Tenant</option><option>Condo</option></select></div>
+          </div>
+        </div>
+
+        <div class="question-block"><label style="font-weight:700">Section 1 - Confirm Named Insured</label><label class="radio-label"><input type="checkbox" id="pr-verifyInsured"> Verify all named insureds</label></div>
+        <div class="question-block"><label style="font-weight:700">Section 2 - Verify Address(es)</label><label class="radio-label"><input type="checkbox" id="pr-confirmMailing"> Confirm mailing address</label><label class="radio-label"><input type="checkbox" id="pr-confirmDwelling"> Confirm risk/dwelling address(es)</label></div>
+        <div class="question-block"><label style="font-weight:700">Section 3 - Verify Dwelling Details and Updates</label><label class="radio-label"><input type="checkbox" id="pr-roof"> Roof verified</label><label class="radio-label"><input type="checkbox" id="pr-electrical"> Electrical verified</label><label class="radio-label"><input type="checkbox" id="pr-plumbing"> Plumbing verified</label><label class="radio-label"><input type="checkbox" id="pr-heating"> Heating verified</label><label class="radio-label"><input type="checkbox" id="pr-waterMitigation"> Water mitigation verified</label><label class="radio-label"><input type="checkbox" id="pr-otherUpdates"> Other updates reviewed</label><label class="radio-label"><input type="checkbox" id="pr-noBusinessHome"> No business operations in home confirmed</label><label class="radio-label"><input type="checkbox" id="pr-noRenovations"> No major renovations confirmed</label><label class="radio-label"><input type="checkbox" id="pr-remindContact"> Client reminded to contact BIG for updates</label><label>Are there any changes to property or new properties being added?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-propertyChanges" value="Yes" onchange="showCond('pr-propertyChanges-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-propertyChanges" value="No" onchange="showCond('pr-propertyChanges-details',false)"> No</label></div><div id="pr-propertyChanges-details" class="conditional"><div class="warning-box">Complete/update all COPE details.</div></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 4 - Review Coverages and Deductibles</label><label class="radio-label"><input type="checkbox" id="pr-dwellingCoverage"> Dwelling/building coverage explained</label><label class="radio-label"><input type="checkbox" id="pr-personalProperty"> Personal property reviewed</label><label class="radio-label"><input type="checkbox" id="pr-liabilityIncrease"> Liability increase offered</label><label class="radio-label"><input type="checkbox" id="pr-otherCoverages"> Other coverages reviewed</label><label>Is building coverage required?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-buildingCoverageReq" value="Yes" onchange="showCond('pr-buildingCoverageReq-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-buildingCoverageReq" value="No" onchange="showCond('pr-buildingCoverageReq-details',false)"> No</label></div><div id="pr-buildingCoverageReq-details" class="conditional"><div class="field-row triple"><div class="field-group"><label>Confirm building limit:</label><input type="text" id="pr-buildingLimit" placeholder="Building limit"></div><div class="field-group"><label>ITV completed?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-itvCompleted" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="pr-itvCompleted" value="No"> No</label></div></div><div class="field-group"><label>MSB valuation completed (for commercial buildings)?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-msbCompleted" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="pr-msbCompleted" value="No"> No</label></div></div></div></div><label>Are coverage limits accurate and up to date?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-limitsAccurate" value="Yes" onchange="showCond('pr-limitsAccurate-details',false)"> Yes</label><label class="radio-label"><input type="radio" name="pr-limitsAccurate" value="No" onchange="showCond('pr-limitsAccurate-details',true)"> No</label></div><div id="pr-limitsAccurate-details" class="conditional"><div class="field-row triple"><div class="field-group"><label>Building limit:</label><input type="text" id="pr-buildingLimitUpdated" placeholder="Updated building limit"></div><div class="field-group"><label>Contents limit:</label><input type="text" id="pr-contentsLimitUpdated" placeholder="Updated contents limit"></div><div class="field-group"><label>Any additional limits:</label><input type="text" id="pr-additionalLimitsUpdated" placeholder="Updated additional limits"></div></div></div><div class="field-row"><div class="field-group"><label>Detached structures sufficient?</label><select id="pr-detachedStructures"><option value="">Select...</option><option>Yes</option><option>No</option></select></div><div class="field-group"><label>Additional living expenses discussed?</label><select id="pr-livingExpenses"><option value="">Select...</option><option>Yes</option><option>No</option></select></div></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 5 - Water Damage Coverage</label><div class="field-row triple"><div class="field-group"><label>Reviewed current water damage coverages?</label><select id="pr-reviewedWater"><option value="">Select...</option><option>Yes</option><option>No</option></select></div><div class="field-group"><label>Identified missing water-related coverages?</label><select id="pr-identifiedMissingWater"><option value="">Select...</option><option>Yes</option><option>No</option></select></div><div class="field-group"><label>Sewer backup:</label><select id="pr-sewerBackup"><option value="">Select...</option><option>Yes</option><option>No</option></select></div></div><div class="field-row"><div class="field-group"><label>Overland water:</label><select id="pr-overlandWater"><option value="">Select...</option><option>Yes</option><option>No</option></select></div><div class="field-group"><label>Ground water:</label><select id="pr-groundWater"><option value="">Select...</option><option>Yes</option><option>No</option></select></div></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 6 - Review and Offer Additional or Increased Coverages</label><label class="radio-label"><input type="checkbox" id="pr-coverageIncreases"> Coverage increases reviewed/offered</label><label class="radio-label"><input type="checkbox" id="pr-optionalCoverages"> Optional/additional coverages offered</label><label class="radio-label"><input type="checkbox" id="pr-advisedPremiumImpact"> Premium impact advised</label><label>Does the business require additional coverages?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-additionalCoverageReq" value="Yes" onchange="showCond('pr-additionalCoverageReq-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-additionalCoverageReq" value="No" onchange="showCond('pr-additionalCoverageReq-details',false)"> No</label></div><div id="pr-additionalCoverageReq-details" class="conditional"><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="pr-cov-eo"> E&amp;O</label><label class="radio-label"><input type="checkbox" id="pr-cov-pollution"> Pollution</label><label class="radio-label"><input type="checkbox" id="pr-cov-garage"> Garage policy</label><label class="radio-label"><input type="checkbox" id="pr-cov-other"> Other</label></div><div class="field-row single"><div class="field-group"><label>Other (specify):</label><input type="text" id="pr-covOtherDetails" placeholder="Specify other coverage"></div></div></div><label>Have revenues been confirmed?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-revenuesConfirmed" value="Yes" onchange="showCond('pr-revenuesConfirmed-details',false)"> Yes</label><label class="radio-label"><input type="radio" name="pr-revenuesConfirmed" value="No" onchange="showCond('pr-revenuesConfirmed-details',true)"> No</label></div><div id="pr-revenuesConfirmed-details" class="conditional"><div class="field-row single"><div class="field-group"><label>Provide total revenue:</label><input type="text" id="pr-totalRevenue" placeholder="Total revenue"></div></div><div class="field-row single"><div class="field-group"><label>If multiple operations, provide breakdown by operation:</label><textarea id="pr-revenueBreakdown" placeholder="Operation breakdown..."></textarea></div></div><div class="question-block"><label>Is there liquor exposure?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-liquorExposure" value="Yes" onchange="showCond('pr-liquorExposure-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-liquorExposure" value="No" onchange="showCond('pr-liquorExposure-details',false)"> No</label></div></div><div id="pr-liquorExposure-details" class="conditional"><div class="field-row single"><div class="field-group"><label>Provide liquor-related revenue:</label><input type="text" id="pr-liquorRevenue" placeholder="Liquor-related revenue"></div></div></div></div><label>Any U.S. operations or revenue?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-usOpsRevenue" value="Yes" onchange="showCond('pr-usOpsRevenue-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-usOpsRevenue" value="No" onchange="showCond('pr-usOpsRevenue-details',false)"> No</label></div><div id="pr-usOpsRevenue-details" class="conditional"><div class="field-row single"><div class="field-group"><label>Provide details of operations/revenue in the U.S.:</label><textarea id="pr-usOpsRevenueDetails" placeholder="U.S. operations/revenue details..."></textarea></div></div></div><label>Does the client use subcontractors?</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-useSubcontractors" value="Yes" onchange="showCond('pr-useSubcontractors-details',true)"> Yes</label><label class="radio-label"><input type="radio" name="pr-useSubcontractors" value="No" onchange="showCond('pr-useSubcontractors-details',false)"> No</label></div><div id="pr-useSubcontractors-details" class="conditional"><div class="question-block"><label>Confirm Certificates of Insurance (COIs) are obtained:</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-coiObtained" value="Yes"> Yes</label><label class="radio-label"><input type="radio" name="pr-coiObtained" value="No"> No</label></div></div></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 7 - Review Current Discount</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="pr-smokeFree"> Smoke-free discount reviewed</label><label class="radio-label"><input type="checkbox" id="pr-waterMitigationDiscount"> Water mitigation discount reviewed</label><label class="radio-label"><input type="checkbox" id="pr-mortgageFree"> Mortgage-free discount reviewed</label><label class="radio-label"><input type="checkbox" id="pr-otherDiscounts"> Other discounts reviewed</label></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 8 - Policy Premium Increase</label><div class="checkbox-grid"><label class="radio-label"><input type="checkbox" id="pr-shopPolicy"> Shop policy if over 15% increase</label><label class="radio-label"><input type="checkbox" id="pr-didNotShop" onchange="showCond('pr-shopReason-wrap', this.checked)"> Did not shop</label></div><div id="pr-shopReason-wrap" class="conditional"><div class="field-row single"><div class="field-group"><label>Reason not shopped:</label><textarea id="pr-shopReason" placeholder="Provide reason..."></textarea></div></div></div></div>
+        <div class="question-block"><label style="font-weight:700">Section 9 - Additional Review Notes</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-monoline" value="Yes" onchange="showCond('pr-monoline-interest',true)"> Monoline: Yes</label><label class="radio-label"><input type="radio" name="pr-monoline" value="No" onchange="showCond('pr-monoline-interest',false)"> Monoline: No</label></div><div id="pr-monoline-interest" class="conditional"><div class="radio-group"><label class="radio-label"><input type="radio" name="pr-monolineInterested" value="Yes" onchange="showCond('pr-monoline-offered',true)"> Interested in another line quote: Yes</label><label class="radio-label"><input type="radio" name="pr-monolineInterested" value="No" onchange="showCond('pr-monoline-offered',false)"> Interested in another line quote: No</label></div><div id="pr-monoline-offered" class="conditional"><div class="field-group"><label>Offered:</label><select id="pr-monolineOffered"><option value="">Select...</option><option>Offered Home</option><option>Offered Auto</option><option>Offered Life</option><option>Offered Commercial</option></select></div></div></div><div class="field-row single"><div class="field-group"><label>Additional review notes:</label><textarea id="pr-additionalReviewNotes" placeholder="Additional notes..."></textarea></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== PAYMENT METHOD CHANGE (Billing) =====
+         Switch payment method to Credit Card or Void Cheque; effective date + free-text details. -->
+    <div class="form-section" id="sec-PaymentMethodChange">
+      <div class="section-header"><h2>PAYMENT METHOD CHANGE</h2><span class="section-badge">Billing</span></div>
+      <div class="section-body">
+        <div class="field-row single"><div class="field-group"><label>Effective date of change:</label><input type="date" id="pmc-effectiveDate"></div></div>
+        <div class="question-block"><label>Payment method:</label><div class="radio-group"><label class="radio-label"><input type="radio" name="pmc-method" value="Credit Card"> Credit Card</label><label class="radio-label"><input type="radio" name="pmc-method" value="Void Cheque"> Void cheque</label></div></div>
+        <div class="field-row single"><div class="field-group"><label>Details:</label><textarea id="pmc-details" placeholder="Any relevant payment method details..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- ===== CHANGE PAYMENT PLAN (Billing) =====
+         Change to monthly/annual/etc., withdrawal date, and reason. -->
+    <div class="form-section" id="sec-ChangePaymentPlan">
+      <div class="section-header"><h2>CHANGE PAYMENT PLAN</h2><span class="section-badge">Billing</span></div>
+      <div class="section-body">
+        <div class="field-row"><div class="field-group"><label>Effective date:</label><input type="date" id="cpp-effectiveDate"></div><div class="field-group"><label>Change plan to:</label><input type="text" id="cpp-changePlan" placeholder="e.g. Monthly, Annual"></div></div>
+        <div class="field-row"><div class="field-group"><label>Withdrawal date:</label><input type="text" id="cpp-withdrawalDate" placeholder="e.g. 1st of month"></div><div class="field-group"><label>Reason:</label><input type="text" id="cpp-reason" placeholder="Reason for plan change"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== REFUND INQUIRY (Billing) =====
+         Requested refund amount, reason for inquiry, and free-text notes. -->
+    <div class="form-section" id="sec-RefundInquiry">
+      <div class="section-header"><h2>REFUND INQUIRY</h2><span class="section-badge">Billing</span></div>
+      <div class="section-body">
+        <div class="field-row"><div class="field-group"><label>Requested refund amount:</label><input type="text" id="ri-amount" placeholder="Amount"></div><div class="field-group"><label>Reason for inquiry:</label><input type="text" id="ri-reason" placeholder="Reason"></div></div>
+        <div class="field-row single"><div class="field-group"><label>Notes:</label><textarea id="ri-notes" placeholder="Additional refund inquiry notes..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- ===== MAKE A PAYMENT (Billing) =====
+         Payment amount, due date, method (CC / eTransfer / Mobile Banking), and notes. -->
+    <div class="form-section" id="sec-MakePayment">
+      <div class="section-header"><h2>MAKE A PAYMENT</h2><span class="section-badge">Billing</span></div>
+      <div class="section-body">
+        <div class="field-row"><div class="field-group"><label>Payment amount:</label><input type="text" id="mp-amount" placeholder="Amount"></div><div class="field-group"><label>Payment due date:</label><input type="date" id="mp-date"></div></div>
+        <div class="question-block"><label>Payment method:</label><div class="radio-group"><label class="radio-label"><input type="radio" name="mp-method" value="Credit Card"> Credit Card</label><label class="radio-label"><input type="radio" name="mp-method" value="eTransfer"> eTransfer</label><label class="radio-label"><input type="radio" name="mp-method" value="Mobile Banking Payment"> Mobile Banking Payment</label></div></div>
+        <div class="field-row single"><div class="field-group"><label>Notes:</label><textarea id="mp-notes" placeholder="Additional payment notes..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- ===== BILLING – OTHER =====
+         Catch-all free-text details for any other billing request. -->
+    <div class="form-section" id="sec-BillingOther">
+      <div class="section-header"><h2>BILLING - OTHER</h2><span class="section-badge">Billing</span></div>
+      <div class="section-body">
+        <div class="field-row single"><div class="field-group"><label>Details:</label><textarea id="bo-details" placeholder="Describe the billing request..."></textarea></div></div>
+      </div>
+    </div>
+
+    <!-- ===== FLOATING GENERATE-NOTES PANEL =====
+         Bottom-center hover/click tab that expands a panel with "Generate All Notes",
+         combined output textarea, and Copy. Primary UX for producing the final notation. -->
+    <div class="notes-tab" id="notes-tab">
+      <span>Generate Notes</span>
+      <span class="notes-tab-arrow" aria-hidden="true">▲</span>
+    </div>
+    <aside class="floating-notes-panel" id="floating-notes-panel">
+      <span class="floating-notes-title">Generate Notes</span>
+      <button class="floating-generate-btn" onclick="generateAllNotes()">Generate All Notes</button>
+      <div class="floating-notes-results" id="floating-notes-results">
+        <button class="floating-copy-btn" onclick="copyAllNotes()">Copy Notes</button>
+        <textarea id="all-notes-output" class="floating-output" placeholder="Generated combined notes will appear here..." readonly></textarea>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
