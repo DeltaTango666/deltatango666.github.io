@@ -119,20 +119,9 @@
 
 <div class="card">
   <div class="row">
-    <button id="folder-btn" onclick="chooseFolder()">Select project folder</button>
     <button id="build-btn" onclick="build()">Build merged file</button>
   </div>
-  <div id="folder-status">No folder selected — build will download the file instead of replacing it in place.</div>
-  <div id="status"></div>
-</div>
-
-<div class="card">
-  <strong>Notes</strong>
-  <ul>
-    <li>This page must be served over <code>http(s)</code> (e.g. GitHub Pages, or <code>npx serve</code> locally) — opening it directly as a <code>file://</code> URL will block the fetch requests due to browser security rules.</li>
-    <li>It fetches <code>index.html</code>, <code>styles.css</code>, and <code>script.js</code> from the same folder as this page, so keep them together.</li>
-    <li><strong>Select project folder</strong> uses the File System Access API (Chrome/Edge only) to grant write access to your local project folder once per session, so <strong>Build</strong> can overwrite <code>PolicyNotationTool.html</code> in place instead of downloading a new copy each time. If your browser doesn't support this (e.g. Firefox, Safari), Build will fall back to a normal download.</li>
-  </ul>
+    <div id="status"></div>
 </div>
 
 <div id="modal-backdrop">
